@@ -9,7 +9,7 @@ require "sprockets/railtie"
 # require "rails/test_unit/railtie"
 
 Bundler.require(*Rails.groups)
-require "ddr_batch"
+require "ddr/batch"
 
 module Dummy
   class Application < Rails::Application
