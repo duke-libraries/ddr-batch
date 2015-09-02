@@ -1,0 +1,112 @@
+<h3><%= t('ddr.batch.web.page_titles.batch_object', :id => @batch_object.id) %></h3>
+
+<table class='table-condensed'>
+	<tr>
+		<td><%= t('ddr.batch.web.column_names.part_of_batch') %></td>
+		<td><%= render_link_to_batch_with_name(@batch_object.batch) %></td>
+	</tr>
+	<tr>
+		<td><%= t('ddr.batch.web.column_names.identifier') %></td>
+		<td><%= @batch_object.identifier %></td>
+	</tr>
+	<tr>
+		<td><%= t('ddr.batch.web.column_names.model') %></td>
+		<td><%= @batch_object.model %></td>
+	</tr>
+	<tr>
+		<td><%= t('ddr.batch.web.column_names.pid') %></td>
+		<td><%= @batch_object.pid %></td>
+	</tr>
+	<tr>
+		<td><%= t('ddr.batch.web.column_names.verified_in_repository') %></td>
+		<td><%= @batch_object.verified %></td>
+	</tr>
+</table>
+
+<h4>Relationships</h4>
+<% if @batch_object.batch_object_relationships.present? %>
+	<table class='table-bordered'>
+		<thead>
+			<th><%= t('ddr.batch.web.column_names.id') %></th>
+			<th><%= t('ddr.batch.web.column_names.name') %></th>
+			<th><%= t('ddr.batch.web.column_names.operation') %></th>
+			<th><%= t('ddr.batch.web.column_names.related_object') %></th>
+			<th><%= t('ddr.batch.web.column_names.related_object_type') %></th>
+		</thead>
+		<% @batch_object.batch_object_relationships.each do |rel| %>
+			<tr>
+				<td><%= rel.id %></td>
+				<td><%= rel.name %></td>
+				<td><%= rel.operation %></td>
+				<td><%= rel.object %></td>
+				<td><%= rel.object_type %></td>
+			</tr>
+		<% end %>
+	</table>
+<% else %>
+	<div>No relationships in this batch object</div>
+<% end %>
+
+<h4>Attributes</h4>
+<% if @batch_object.batch_object_attributes.present? %>
+	<table class='table-bordered'>
+		<thead>
+			<th><%= t('ddr.batch.web.column_names.id') %></th>
+			<th><%= t('ddr.batch.web.column_names.datastream') %></th>
+			<th><%= t('ddr.batch.web.column_names.name') %></th>
+			<th><%= t('ddr.batch.web.column_names.operation') %></th>
+			<th><%= t('ddr.batch.web.column_names.value') %></th>
+			<th><%= t('ddr.batch.web.column_names.value_type') %></th>
+		</thead>
+		<% @batch_object.batch_object_attributes.each do |att| %>
+			<tr>
+				<td><%= att.id %></td>
+				<td><%= att.datastream %></td>
+				<td><%= att.name %></td>
+				<td><%= att.operation %></td>
+				<td><%= att.value %></td>
+				<td><%= att.value_type %></td>
+			</tr>
+		<% end %>
+	</table>
+<% else %>
+	<div>No attributes in this batch object</div>
+<% end %>
+
+<h4>Datastreams</h4>
+<% if @batch_object.batch_object_datastreams.present? %>
+	<% @batch_object.batch_object_datastreams.each do |ds| %>
+		<table class='table-bordered'>
+			<tr>
+				<td><%= t('ddr.batch.web.column_names.id') %></td>
+				<td><%= ds.id %></td>
+			</tr>
+			<tr>
+				<td><%= t('ddr.batch.web.column_names.name') %></td>
+				<td><%= ds.name %></td>
+			</tr>
+			<tr>
+				<td><%= t('ddr.batch.web.column_names.operation') %></td>
+				<td><%= ds.operation %></td>
+			</tr>
+			<tr>
+				<td><%= t('ddr.batch.web.column_names.payload') %></td>
+				<td><%= ds.payload %></td>
+			</tr>
+			<tr>
+				<td><%= t('ddr.batch.web.column_names.payload_type') %></td>
+				<td><%= ds.payload_type %></td>
+			</tr>
+			<tr>
+				<td><%= t('ddr.batch.web.column_names.checksum') %></td>
+				<td><%= ds.checksum.present? ? ds.checksum : '--' %></td>
+			</tr>
+			<tr>
+				<td><%= t('ddr.batch.web.column_names.checksum_type') %></td>
+				<td><%= ds.checksum_type.present? ? ds.checksum_type : '--' %></td>
+			</tr>
+		</table>
+	<% end %>
+<% else %>
+	<div>No datastreams in this batch object</div>
+<% end %>

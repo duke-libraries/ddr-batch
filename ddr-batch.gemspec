@@ -17,12 +17,15 @@ Gem::Specification.new do |s|
   s.files = Dir["{app,config,db,lib}/**/*", "LICENSE.txt", "Rakefile", "README.md"]
 
   s.add_dependency "rails", "~> 4.1.13"
+  s.add_dependency "devise", "~> 3.4"
   s.add_dependency "paperclip", "~> 4.2.0"
   s.add_dependency "ddr-models", "~> 2.0"
+  s.add_dependency "log4r"
 
   s.add_development_dependency "sqlite3"
   s.add_development_dependency "rspec-rails", "~> 3.1"
   s.add_development_dependency "factory_girl_rails", "~> 4.4"
+  s.add_development_dependency "capybara", "~> 2.0"
   s.add_development_dependency "jettywrapper", "~> 1.8"
   s.add_development_dependency "database_cleaner"
 end

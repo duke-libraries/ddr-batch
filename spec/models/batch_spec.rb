@@ -29,10 +29,10 @@ module Ddr::Batch
         batch.destroy
       end
       it "should destroy all the associated dependent objects" do
-        expect(Ddr::Batch::Batch.all).to be_empty
-        expect(Ddr::Batch::BatchObject.all).to be_empty
-        expect(Ddr::Batch::BatchObjectDatastream.all).to be_empty
-        expect(Ddr::Batch::BatchObjectRelationship.all).to be_empty
+        expect(Batch.all).to be_empty
+        expect(BatchObject.all).to be_empty
+        expect(BatchObjectDatastream.all).to be_empty
+        expect(BatchObjectRelationship.all).to be_empty
       end
     end
 
@@ -42,11 +42,11 @@ module Ddr::Batch
       before do
         batch.batch_objects.each do |obj|
           obj.batch_object_relationships <<
-              Ddr::Batch::BatchObjectRelationship.new(
-                  :name => Ddr::Batch::BatchObjectRelationship::RELATIONSHIP_PARENT,
+              BatchObjectRelationship.new(
+                  :name => BatchObjectRelationship::RELATIONSHIP_PARENT,
                   :object => parent.pid,
-                  :object_type => Ddr::Batch::BatchObjectRelationship::OBJECT_TYPE_PID,
-                  :operation => Ddr::Batch::BatchObjectRelationship::OPERATION_ADD
+                  :object_type => BatchObjectRelationship::OBJECT_TYPE_PID,
+                  :operation => BatchObjectRelationship::OPERATION_ADD
                   )
         end
       end

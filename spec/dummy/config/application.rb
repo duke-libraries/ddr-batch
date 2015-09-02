@@ -11,6 +11,12 @@ require "sprockets/railtie"
 Bundler.require(*Rails.groups)
 require "ddr/batch"
 
+# log4r
+require 'log4r'
+require 'log4r/yamlconfigurator'
+require 'log4r/outputter/datefileoutputter'
+include Log4r
+
 module Dummy
   class Application < Rails::Application
     # Settings in config/environments/* take precedence over those specified here.
