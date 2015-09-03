@@ -16,7 +16,7 @@ and
 
 ### User model
 
-Include `Ddr::Batch::User` in `app/models/user.rb`
+Include `Ddr::Batch::BatchUser` in `app/models/user.rb`
 
 ```ruby
 class User < ActiveRecord::Base
