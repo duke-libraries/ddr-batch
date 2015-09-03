@@ -11,3 +11,21 @@ Add to your application's Gemfile:
 and
 
     bundle install
+
+## Configuration
+
+### User model
+
+Include `Ddr::Batch::User` in `app/models/user.rb`
+
+```ruby
+class User < ActiveRecord::Base
+
+  # DO NOT REMOVE:
+  # Blacklight::User
+  # Ddr::Auth::User
+  #
+  include Ddr::Batch::BatchUser
+
+end
+```
