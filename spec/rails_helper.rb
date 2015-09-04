@@ -6,6 +6,8 @@ abort("The Rails environment is running in production mode!") if Rails.env.produ
 require 'spec_helper'
 require 'rspec/rails'
 # Add additional requires below this line. Rails is not loaded until this point!
+require "capybara/rails"
+require "capybara/rspec"
 require "ddr/auth/test_helpers"
 require "factory_girl_rails"
 require "database_cleaner"
@@ -57,13 +59,19 @@ RSpec.configure do |config|
   # https://relishapp.com/rspec/rspec-rails/docs
   config.infer_spec_type_from_file_location!
 
+  # Devise helpers
+  config.include Devise::TestHelpers, type: :controller
+
+  # Warden helpers
+  config.include Warden::Test::Helpers, type: :feature
+  Warden.test_mode!
+
   config.before(:suite) do
     DatabaseCleaner.clean
     ActiveFedora::Base.destroy_all
   end
 
-  config.after(:each) do
-    ActiveFedora::Base.destroy_all
-  end
+  config.after(:each) { ActiveFedora::Base.destroy_all }
+  config.after(:each, type: :feature) { Warden.test_reset! }
 
 end

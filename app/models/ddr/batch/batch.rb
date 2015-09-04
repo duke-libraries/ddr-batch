@@ -40,8 +40,10 @@ module Ddr::Batch
 
     def time_to_complete
       unless processing_step_start.nil?
-        completed = completed_count
-        ((Time.now - processing_step_start.to_time) / completed) * (batch_objects.count - completed)
+        if completed_count > 0
+          completed = completed_count
+          ((Time.now - processing_step_start.to_time) / completed) * (batch_objects.count - completed)
+        end
       end
     end
 

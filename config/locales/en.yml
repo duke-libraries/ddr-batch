@@ -3,3 +3,50 @@ en:
         batch:
             errors:
                 prefix: "%{identifier} [Database ID: %{id}]:"
+            no_batches: "No %{type} batches found for your user account."
+            web:
+                action_names:
+                    procezz: "Process"
+                    restart: "Restart"
+                    retry: "Retry"
+                    validate: "Validate"
+                batch_deletion_confirmation: "You are about to delete batch %{batch_id}. Continue?"
+                column_names:
+                    action: "Action"
+                    checksum: "Checksum"
+                    checksum_type: "Checksum Type"
+                    creation_date: "Created"
+                    datastream: "Datastream"
+                    description: "Description"
+                    id: "ID"
+                    identifier: "Identifier"
+                    log: "Log"
+                    model: "Model"
+                    name: "Name"
+                    objects: "Objects"
+                    operation: "Operation"
+                    outcome: "Outcome"
+                    part_of_batch: "Part of Batch"
+                    payload: "Payload"
+                    payload_type: "Payload Type"
+                    pid: "PID"
+                    related_object: "Related Object"
+                    related_object_type: "Related Object Type"
+                    start: "Start"
+                    status: "Status"
+                    user: "User"
+                    value: "Value"
+                    value_type: "Value Type"
+                    verified: "Verified"
+                    verified_in_repository: "Verified in Repository?"
+                headings:
+                    object_validation_errors: "Batch Object Validation Errors"
+                page_titles:
+                    batch: "Batch %{id}"
+                    batches: "Batches"
+                    batch_object: "Batch Object %{id}"
+                tabs:
+                    finished_batches:
+                        label: "Already Run"
+                    pending_batches:
+                        label: "Pending"

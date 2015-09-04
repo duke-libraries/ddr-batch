@@ -4,6 +4,8 @@ module Ddr
 
       isolate_namespace Ddr::Batch
 
+      engine_name 'ddr_batch'
+
       config.generators do |g|
         g.test_framework :rspec
         g.fixture_replacement :factory_girl
