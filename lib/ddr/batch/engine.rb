@@ -2,8 +2,6 @@ module Ddr
   module Batch
     class Engine < ::Rails::Engine
 
-      isolate_namespace Ddr::Batch
-
       engine_name 'ddr_batch'
 
       config.generators do |g|
