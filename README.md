@@ -1,6 +1,6 @@
 # ddr-batch
 
-A mountable Rails engine providing batch processing functionality for the Duke Digital Repository.
+A Rails engine providing batch processing functionality for the Duke Digital Repository.
 
 ## Installation
 
@@ -13,16 +13,6 @@ and
     bundle install
 
 ## Configuration
-
-### Engine mounting
-
-Mount `Ddr::Batch::Engine` at the desired path in `config/routes.rb`.
-
-```ruby
-mount Ddr::Batch::Engine, at: "/batch"
-```
-
-The engine name is `ddr_batch`.
 
 ### User model
 
