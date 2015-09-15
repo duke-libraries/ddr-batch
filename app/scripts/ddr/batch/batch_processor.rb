@@ -61,6 +61,7 @@ module Ddr::Batch
         begin
           process_object(object)
         rescue Exception => e
+          @bp_log.error(e.backtrace)
           break
         end
         sleep 2
