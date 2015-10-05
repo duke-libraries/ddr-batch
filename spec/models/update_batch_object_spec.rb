@@ -66,8 +66,7 @@ module Ddr::Batch
     context "update" do
       let(:repo_object) { TestModel.create(pid: object.pid, title: [ "Test Model Title" ], identifier: [ "id1", "id2" ]) }
       before do
-        repo_object.edit_users = [batch.user.user_key]
-        repo_object.save!
+        batch.user.can :edit, repo_object
         object.process(batch.user)
         repo_object.reload
       end
