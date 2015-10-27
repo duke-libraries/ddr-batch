@@ -29,9 +29,10 @@ module Ddr::Batch
     context "validate", validation: true do
       let(:batch) { FactoryGirl.create(:batch_with_basic_update_batch_object) }
       context "valid object" do
-        let(:repo_object) { TestModel.create(:pid => object.pid) }
+        let(:repo_object) { TestModel.new(:pid => object.pid) }
         before do
-          batch.user.can :edit, repo_object
+          repo_object.roles.grant({ type: 'MetadataEditor', agent: batch.user.user_key, scope: 'resource' })
+          repo_object.save
         end
         context "generic object" do
           it_behaves_like "a valid update object"
