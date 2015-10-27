@@ -145,7 +145,8 @@ module Ddr::Batch
       end
       let(:bp) { BatchProcessor.new(batch, bp_user, log_dir: log_dir) }
       before do
-        batch.user.can :edit, repo_object
+        repo_object.roles.grant({ type: 'MetadataEditor', agent: batch.user.user_key, scope: 'resource' })
+        repo_object.save
       end
       context "successful update" do
         before { bp.execute }
