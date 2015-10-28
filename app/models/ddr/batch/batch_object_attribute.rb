@@ -46,11 +46,16 @@ module Ddr::Batch
     end
 
     def datastream_valid?
-        datastream_type < ActiveFedora::RDFDatastream rescue false
+        [ 'adminMetadata', 'descMetadata' ].include?(datastream)
     end
 
     def attribute_name_valid?
-      datastream_type.term_names.include?(name.to_sym)
+      case datastream
+        when 'adminMetadata'
+          batch_object.model.constantize.properties.include?(name)
+        when 'descMetadata'
+          Ddr::Models::DescriptiveMetadata.unqualified_names.include?(name.to_sym)
+      end
     end
 
   end

@@ -21,19 +21,14 @@ module Ddr::Batch
     it "should result in a verified repository object" do
       expect(object.verified).to be_truthy
       expect(object.pid).to eq(assigned_pid) if assigned_pid.present?
-      expect(repo_object.title).to eq(["Test Object Title"])
       unless object.batch_object_attributes.empty?
+        expect(repo_object.dc_title).to eq(["Test Object Title"])
         expect(verification_event.detail).to include("title attribute set correctly...#{BatchObject::VERIFICATION_PASS}")
       end
     end
   end
 
   describe IngestBatchObject, type: :model, batch: true, ingest: true do
-
-    before do
-      allow(File).to receive(:readable?).and_call_original
-      allow(File).to receive(:readable?).with("/tmp/qdc-rdf.nt").and_return(true)
-    end
 
     context "validate" do
 
@@ -94,7 +89,7 @@ module Ddr::Batch
         context "invalid admin policy" do
           let(:object) { FactoryGirl.create(:ingest_batch_object, :has_batch, :has_model) }
           context "admin policy pid object does not exist" do
-            let(:admin_policy_pid) { "bogus:AdminPolicy" }
+            let(:admin_policy_pid) { "bogus-AdminPolicy" }
             let(:error_message) { "#{error_prefix} admin_policy relationship object does not exist: #{admin_policy_pid}" }
             before do
               relationship = FactoryGirl.create(:batch_object_add_relationship, :name => "admin_policy", :object => admin_policy_pid, :object_type => BatchObjectRelationship::OBJECT_TYPE_PID)
@@ -115,7 +110,7 @@ module Ddr::Batch
           end
         end
         context "invalid datastreams" do
-          let(:object) { FactoryGirl.create(:ingest_batch_object, :has_model, :with_add_desc_metadata_datastream_bytes, :with_add_content_datastream) }
+          let(:object) { FactoryGirl.create(:ingest_batch_object, :has_model, :with_add_extracted_text_datastream_bytes, :with_add_content_datastream) }
           context "invalid datastream name" do
             let(:error_message) { "#{error_prefix} Invalid datastream name for #{object.model}: #{object.batch_object_datastreams.first[:name]}" }
             before do
@@ -166,7 +161,7 @@ module Ddr::Batch
         context "invalid parent" do
           let(:object) { FactoryGirl.create(:ingest_batch_object, :has_batch, :has_model) }
           context "parent pid object does not exist" do
-            let(:parent_pid) { "bogus:TestParent" }
+            let(:parent_pid) { "bogus-TestParent" }
             let(:error_message) { "#{error_prefix} parent relationship object does not exist: #{parent_pid}" }
             before do
               relationship = FactoryGirl.create(:batch_object_add_relationship, :name => "parent", :object => parent_pid, :object_type => BatchObjectRelationship::OBJECT_TYPE_PID)
@@ -189,7 +184,7 @@ module Ddr::Batch
         context "invalid target_for" do
           let(:object) { FactoryGirl.create(:ingest_batch_object, :has_batch) }
           context "target_for pid object does not exist" do
-            let(:collection_pid) { "bogus:Collection" }
+            let(:collection_pid) { "bogus-Collection" }
             let(:error_message) { "#{error_prefix} collection relationship object does not exist: #{collection_pid}" }
             before do
               object.model = "Target"
@@ -226,7 +221,6 @@ module Ddr::Batch
           end
           context "payload type file" do
             let(:object) { FactoryGirl.create(:generic_ingest_batch_object_with_file) }
-            before { allow(File).to receive(:read).with('/tmp/qdc-rdf.nt').and_return('_:test <http://purl.org/dc/terms/title> "Test Object Title" .') }
             it_behaves_like "a successful ingest"
           end
           context "attributes" do
@@ -236,7 +230,7 @@ module Ddr::Batch
         end
         context "object with a pre-assigned PID" do
           let(:object) { FactoryGirl.create(:generic_ingest_batch_object_with_bytes) }
-          let(:assigned_pid) { 'test:6543' }
+          let(:assigned_pid) { SecureRandom.uuid }
           before do
             object.pid = assigned_pid
             object.save
@@ -245,12 +239,12 @@ module Ddr::Batch
         end
         context "previously ingested object (e.g., during restart)" do
           let(:object) { FactoryGirl.create(:generic_ingest_batch_object_with_bytes) }
-          let(:assigned_pid) { 'test:6543' }
+          let(:assigned_pid) { SecureRandom.uuid }
           before do
             object.pid = assigned_pid
             object.verified = true
             object.save
-            repo_object = object.model.constantize.new(:pid => assigned_pid, title: ["Test Object Title"])
+            repo_object = object.model.constantize.new(:pid => assigned_pid, dc_title: ["Test Object Title"])
             repo_object.save(validate: false)
           end
           it_behaves_like "a successful ingest"

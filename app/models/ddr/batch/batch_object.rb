@@ -75,7 +75,7 @@ module Ddr::Batch
         errs = []
         batch_object_datastreams.each do |d|
           if model_datastream_keys.present?
-            unless model_datastream_keys.include?(d.name)
+            unless model_datastream_keys.include?(d.name.to_sym)
               errs << "#{@error_prefix} Invalid datastream name for #{model}: #{d.name}"
             end
           end
@@ -153,7 +153,7 @@ module Ddr::Batch
         else
           verifications["Object exists in repository"] = VERIFICATION_PASS
           verifications["Object is correct model"] = verify_model(repo_object) if model
-          verifications["Object has correct label"] = verify_label(repo_object) if label
+          # verifications["Object has correct label"] = verify_label(repo_object) if label
           unless batch_object_attributes.empty?
             batch_object_attributes.each do |a|
               if a.operation == BatchObjectAttribute::OPERATION_ADD
@@ -190,13 +190,18 @@ module Ddr::Batch
         end
       end
 
-      def verify_label(repo_object)
-        repo_object.label.eql?(label) ? VERIFICATION_PASS : VERIFICATION_FAIL
-      end
-
+      # def verify_label(repo_object)
+      #   repo_object.label.eql?(label) ? VERIFICATION_PASS : VERIFICATION_FAIL
+      # end
+      #
       def verify_attribute(repo_object, attribute)
-        repo_object.datastreams[attribute.datastream].values(attribute.name).include?(attribute.value) ?
-                VERIFICATION_PASS : VERIFICATION_FAIL
+        verified = case attribute.datastream
+          when 'descMetadata'
+            repo_object.descMetadata.values(attribute.name).include?(attribute.value)
+          when 'adminMetadata'
+            repo_object.adminMetadata.values(attribute.name).include?(attribute.value)
+        end
+        verified ? VERIFICATION_PASS : VERIFICATION_FAIL
       end
 
       def verify_datastream(repo_object, datastream)
@@ -229,18 +234,18 @@ module Ddr::Batch
       end
 
       def add_attribute(repo_object, attribute)
-        repo_object.datastreams[attribute.datastream].add_value(attribute.name, attribute.value)
+        repo_object.send(attribute.datastream).add_value(attribute.name, attribute.value)
         return repo_object
       end
 
       def clear_attribute(repo_object, attribute)
-        repo_object.datastreams[attribute.datastream].set_values(attribute.name, nil)
+        repo_object.send(attribute.datastream).set_values(attribute.name, nil)
         return repo_object
       end
 
       def clear_attributes(repo_object, attribute)
-        repo_object.datastreams[attribute.datastream].class.term_names.each do |term|
-          repo_object.datastreams[attribute.datastream].set_values(term, nil) if repo_object.datastreams[attribute.datastream].values(term)
+        Ddr::Models::DescriptiveMetadata.unqualified_names.each do |term|
+          repo_object.descMetadata.set_values(term, nil) if repo_object.descMetadata.values(term)
         end
         return repo_object
       end
@@ -264,7 +269,7 @@ module Ddr::Batch
           dsid = datastream[:name]
           opts = { filename: file_name }
           opts.merge({ mime_type: mime_type }) if mime_type
-          repo_object.add_file(ds_content, dsid, opts)
+          repo_object.add_file(ds_content, path: dsid)
         end
         return repo_object
       end

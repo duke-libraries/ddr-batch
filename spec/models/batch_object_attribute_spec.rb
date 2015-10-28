@@ -19,7 +19,7 @@ module Ddr::Batch
           let(:object) { BatchObjectAttribute.new(batch_object: batch_object, datastream: 'foo', name: 'bar') }
           it_should_behave_like 'an invalid batch object attribute object'
         end
-        context "datastream" do
+        context "name" do
           let(:error_key) { :name }
           let(:object) { BatchObjectAttribute.new(batch_object: batch_object, datastream: 'descMetadata', name: 'bar') }
           it_should_behave_like 'an invalid batch object attribute object'

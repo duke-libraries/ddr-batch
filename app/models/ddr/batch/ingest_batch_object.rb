@@ -82,22 +82,22 @@ module Ddr::Batch
       repo_pid = pid if pid.present?
       repo_object = nil
       begin
-        repo_object = model.constantize.new(:pid => repo_pid)
-        repo_object.label = label if label
+        repo_object = model.constantize.new(:id => repo_pid)
+        # repo_object.label = label if label
         repo_object.save(validate: false)
         batch_object_attributes.each { |a| repo_object = add_attribute(repo_object, a) }
         batch_object_datastreams.each { |d| repo_object = populate_datastream(repo_object, d) }
         batch_object_relationships.each { |r| repo_object = add_relationship(repo_object, r) }
         repo_object.save
       rescue Exception => e1
-        logger.fatal("Error in creating repository object #{repo_object.pid} for #{identifier} : #{e1}")
+        logger.fatal("Error in creating repository object #{repo_object.id} for #{identifier} : #{e1}")
         repo_clean = false
         if repo_object && !repo_object.new_record?
           begin
-            logger.info("Deleting potentially incomplete #{repo_object.pid} due to error in ingest batch processing")
+            logger.info("Deleting potentially incomplete #{repo_object.id} due to error in ingest batch processing")
             repo_object.destroy
           rescue Exception => e2
-            logger.fatal("Error deleting repository object #{repo_object.pid}: #{e2}")
+            logger.fatal("Error deleting repository object #{repo_object.id}: #{e2}")
           else
             repo_clean = true
           end
