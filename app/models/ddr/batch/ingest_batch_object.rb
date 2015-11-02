@@ -4,8 +4,7 @@ module Ddr::Batch
 
     def local_validations
       errors = []
-      errors << "#{@error_prefix} Model required for INGEST operation" unless model
-      errors += validate_pre_assigned_pid if pid
+      errors << "#{error_prefix} Model required for INGEST operation" unless model
       errors
     end
 
@@ -27,12 +26,6 @@ module Ddr::Batch
     end
 
     private
-
-    def validate_pre_assigned_pid
-      errs = []
-      errs << "#{@error_prefix} #{pid} already exists in repository" if ActiveFedora::Base.exists?(pid)
-      return errs
-    end
 
     def ingest(user, opts = {})
       repo_object = create_repository_object

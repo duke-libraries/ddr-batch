@@ -87,6 +87,7 @@ FactoryGirl.define do
     end
 
     factory :generic_ingest_batch_object do
+      has_batch
       has_model
       has_admin_policy
       has_parent
@@ -106,6 +107,7 @@ FactoryGirl.define do
     end
 
     factory :target_ingest_batch_object do
+      has_batch
       model "Target"
       is_target_for_collection
       with_add_content_datastream
