@@ -25,7 +25,7 @@ FactoryGirl.define do
   end
 
   trait :has_pid do
-    sequence(:pid) { |n| "test:%d" % n }
+    sequence(:pid) { SecureRandom.uuid }
   end
 
   trait :has_parent do
@@ -47,15 +47,15 @@ FactoryGirl.define do
     end
   end
 
-  trait :with_add_desc_metadata_datastream_bytes do
+  trait :with_add_extracted_text_datastream_bytes do
     after(:create) do |batch_object|
-      FactoryGirl.create(:batch_object_add_desc_metadata_datastream_bytes, :batch_object => batch_object)
+      FactoryGirl.create(:batch_object_add_extracted_text_datastream_bytes, :batch_object => batch_object)
     end
   end
 
-  trait :with_add_desc_metadata_datastream_file do
+  trait :with_add_extracted_text_datastream_file do
     after(:create) do |batch_object|
-      FactoryGirl.create(:batch_object_add_desc_metadata_datastream_file, :batch_object => batch_object)
+      FactoryGirl.create(:batch_object_add_extracted_text_datastream_file, :batch_object => batch_object)
     end
   end
 
@@ -87,17 +87,18 @@ FactoryGirl.define do
     end
 
     factory :generic_ingest_batch_object do
+      has_batch
       has_model
       has_admin_policy
       has_parent
       with_add_content_datastream
 
       factory :generic_ingest_batch_object_with_bytes do
-        with_add_desc_metadata_datastream_bytes
+        with_add_extracted_text_datastream_bytes
       end
 
       factory :generic_ingest_batch_object_with_file do
-        with_add_desc_metadata_datastream_file
+        with_add_extracted_text_datastream_file
       end
 
       factory :generic_ingest_batch_object_with_attributes do
@@ -106,6 +107,7 @@ FactoryGirl.define do
     end
 
     factory :target_ingest_batch_object do
+      has_batch
       model "Target"
       is_target_for_collection
       with_add_content_datastream

@@ -31,8 +31,11 @@ module Ddr::Batch
         return pids
       end
 
+      def error_prefix
+        I18n.t('ddr.batch.errors.prefix', :identifier => identifier, :id => id)
+      end
+
       def validate
-        @error_prefix = I18n.t('ddr.batch.errors.prefix', :identifier => identifier, :id => id)
         errors = []
         errors += validate_model if model
         errors += validate_datastreams if batch_object_datastreams
@@ -66,7 +69,7 @@ module Ddr::Batch
         begin
           model.constantize
         rescue NameError
-          errs << "#{@error_prefix} Invalid model name: #{model}"
+          errs << "#{error_prefix} Invalid model name: #{model}"
         end
         return errs
       end
@@ -75,24 +78,24 @@ module Ddr::Batch
         errs = []
         batch_object_datastreams.each do |d|
           if model_datastream_keys.present?
-            unless model_datastream_keys.include?(d.name)
-              errs << "#{@error_prefix} Invalid datastream name for #{model}: #{d.name}"
+            unless model_datastream_keys.include?(d.name.to_sym)
+              errs << "#{error_prefix} Invalid datastream name for #{model}: #{d.name}"
             end
           end
           unless BatchObjectDatastream::PAYLOAD_TYPES.include?(d.payload_type)
-            errs << "#{@error_prefix} Invalid payload type for #{d.name} datastream: #{d.payload_type}"
+            errs << "#{error_prefix} Invalid payload type for #{d.name} datastream: #{d.payload_type}"
           end
           if d.payload_type.eql?(BatchObjectDatastream::PAYLOAD_TYPE_FILENAME)
             unless File.readable?(d.payload)
-              errs << "#{@error_prefix} Missing or unreadable file for #{d[:name]} datastream: #{d[:payload]}"
+              errs << "#{error_prefix} Missing or unreadable file for #{d[:name]} datastream: #{d[:payload]}"
             end
           end
           if d.checksum && !d.checksum_type
-            errs << "#{@error_prefix} Must specify checksum type if providing checksum for #{d.name} datastream"
+            errs << "#{error_prefix} Must specify checksum type if providing checksum for #{d.name} datastream"
           end
           if d.checksum_type
             unless Ddr::Datastreams::CHECKSUM_TYPES.include?(d.checksum_type)
-              errs << "#{@error_prefix} Invalid checksum type for #{d.name} datastream: #{d.checksum_type}"
+              errs << "#{error_prefix} Invalid checksum type for #{d.name} datastream: #{d.checksum_type}"
             end
           end
         end
@@ -102,44 +105,8 @@ module Ddr::Batch
       def validate_relationships
         errs = []
         batch_object_relationships.each do |r|
-          obj_model = nil
-          unless BatchObjectRelationship::OBJECT_TYPES.include?(r[:object_type])
-            errs << "#{@error_prefix} Invalid object_type for #{r[:name]} relationship: #{r[:object_type]}"
-          end
-          if r[:object_type].eql?(BatchObjectRelationship::OBJECT_TYPE_PID)
-            if batch.present? && batch.found_pids.keys.include?(r[:object])
-              obj_model = batch.found_pids[r[:object]]
-            else
-              begin
-                obj = ActiveFedora::Base.find(r[:object], :cast => true)
-                obj_model = obj.class.name
-                if batch.present?
-                  batch.add_found_pid(obj.pid, obj_model)
-                end
-              rescue ActiveFedora::ObjectNotFoundError
-                pid_in_batch = false
-                if batch.present?
-                  if batch.pre_assigned_pids.include?(r[:object])
-                    pid_in_batch = true
-                  end
-                end
-                unless pid_in_batch
-                  errs << "#{@error_prefix} #{r[:name]} relationship object does not exist: #{r[:object]}"
-                end
-              end
-            end
-            if obj_model
-              relationship_reflection = Ddr::Utils.relationship_object_reflection(model, r[:name])
-              if relationship_reflection
-                klass = Ddr::Utils.reflection_object_class(relationship_reflection)
-                if klass
-                  errs << "#{@error_prefix} #{r[:name]} relationship object #{r[:object]} exists but is not a(n) #{klass}" unless batch.found_pids[r[:object]].eql?(klass.name)
-                end
-              else
-                errs << "#{@error_prefix} #{model} does not define a(n) #{r[:name]} relationship"
-              end
-            end
-          end
+          r.valid?
+          errs += r.errors.messages.values.map { |msg| "#{error_prefix} msg" }
         end
         return errs
       end
@@ -147,13 +114,13 @@ module Ddr::Batch
       def verify_repository_object
         verifications = {}
         begin
-          repo_object = ActiveFedora::Base.find(pid, :cast => true)
-        rescue ActiveFedora::ObjectNotFound
+          repo_object = ActiveFedora::Base.find(pid)
+        rescue ActiveFedora::ObjectNotFoundError
           verifications["Object exists in repository"] = VERIFICATION_FAIL
         else
           verifications["Object exists in repository"] = VERIFICATION_PASS
           verifications["Object is correct model"] = verify_model(repo_object) if model
-          verifications["Object has correct label"] = verify_label(repo_object) if label
+          # verifications["Object has correct label"] = verify_label(repo_object) if label
           unless batch_object_attributes.empty?
             batch_object_attributes.each do |a|
               if a.operation == BatchObjectAttribute::OPERATION_ADD
@@ -190,13 +157,18 @@ module Ddr::Batch
         end
       end
 
-      def verify_label(repo_object)
-        repo_object.label.eql?(label) ? VERIFICATION_PASS : VERIFICATION_FAIL
-      end
-
+      # def verify_label(repo_object)
+      #   repo_object.label.eql?(label) ? VERIFICATION_PASS : VERIFICATION_FAIL
+      # end
+      #
       def verify_attribute(repo_object, attribute)
-        repo_object.datastreams[attribute.datastream].values(attribute.name).include?(attribute.value) ?
-                VERIFICATION_PASS : VERIFICATION_FAIL
+        verified = case attribute.datastream
+          when 'descMetadata'
+            repo_object.descMetadata.values(attribute.name).include?(attribute.value)
+          when 'adminMetadata'
+            repo_object.adminMetadata.values(attribute.name).include?(attribute.value)
+        end
+        verified ? VERIFICATION_PASS : VERIFICATION_FAIL
       end
 
       def verify_datastream(repo_object, datastream)
@@ -216,11 +188,23 @@ module Ddr::Batch
       end
 
       def verify_relationship(repo_object, relationship)
+        # if PID, proceed as below
+        # if AR rec ID,
+        #   retrieve AR rec
+        #   if AR rec has PID, proceed as below using AR rec PID
+        #   if not, error (should not occur)
+        repo_object_id = case
+                           when relationship.object_rec_id?
+                             referent = batch.batch_objects.find(relationship.object)
+                             referent.pid
+                           when relationship.object_repo_id?
+                             relationship.object
+                         end
         relationship_reflection = Ddr::Utils.relationship_object_reflection(model, relationship.name)
         relationship_object_class = Ddr::Utils.reflection_object_class(relationship_reflection)
         relationship_object = repo_object.send(relationship.name)
         if !relationship_object.nil? &&
-            relationship_object.pid.eql?(relationship.object) &&
+            relationship_object.pid.eql?(repo_object_id) &&
             relationship_object.is_a?(relationship_object_class)
           VERIFICATION_PASS
         else
@@ -229,18 +213,18 @@ module Ddr::Batch
       end
 
       def add_attribute(repo_object, attribute)
-        repo_object.datastreams[attribute.datastream].add_value(attribute.name, attribute.value)
+        repo_object.send(attribute.datastream).add_value(attribute.name, attribute.value)
         return repo_object
       end
 
       def clear_attribute(repo_object, attribute)
-        repo_object.datastreams[attribute.datastream].set_values(attribute.name, nil)
+        repo_object.send(attribute.datastream).set_values(attribute.name, nil)
         return repo_object
       end
 
       def clear_attributes(repo_object, attribute)
-        repo_object.datastreams[attribute.datastream].class.term_names.each do |term|
-          repo_object.datastreams[attribute.datastream].set_values(term, nil) if repo_object.datastreams[attribute.datastream].values(term)
+        Ddr::Models::DescriptiveMetadata.unqualified_names.each do |term|
+          repo_object.descMetadata.set_values(term, nil) if repo_object.descMetadata.values(term)
         end
         return repo_object
       end
@@ -264,17 +248,25 @@ module Ddr::Batch
           dsid = datastream[:name]
           opts = { filename: file_name }
           opts.merge({ mime_type: mime_type }) if mime_type
-          repo_object.add_file(ds_content, dsid, opts)
+          repo_object.add_file(ds_content, path: dsid)
         end
         return repo_object
       end
 
       def add_relationship(repo_object, relationship)
-        relationship_object = case relationship[:object_type]
-        when BatchObjectRelationship::OBJECT_TYPE_PID
-          ActiveFedora::Base.find(relationship[:object], :cast => true)
+        repo_object_id = case
+                           when relationship.object_rec_id?
+                             referent = batch.batch_objects.find(relationship[:object])
+                             referent.pid
+                           when relationship.object_repo_id?
+                             relationship[:object]
+                         end
+        if repo_object_id.present?
+          relationship_object = ActiveFedora::Base.find(repo_object_id)
+          repo_object.send("#{relationship[:name]}=", relationship_object)
+        else
+          raise Ddr::Batch::Error, "Unable to determine repository ID for relationship #{relationship.id}"
         end
-        repo_object.send("#{relationship[:name]}=", relationship_object)
         return repo_object
       end
 

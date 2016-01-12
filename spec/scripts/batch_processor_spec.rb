@@ -14,7 +14,7 @@ module Ddr::Batch
       @repo_objects.each_with_index do |obj, index|
         batch_obj = batch.batch_objects[index]
         expect(obj).to be_an_instance_of(batch_obj.model.constantize)
-        expect(obj.label).to eq(batch_obj.label) if batch_obj.label
+        # expect(obj.label).to eq(batch_obj.label) if batch_obj.label
         batch_obj_ds = batch_obj.batch_object_datastreams
         batch_obj_ds.each { |d| expect(obj.datastreams[d.name].content).to_not be_nil }
         batch_obj_rs = batch_obj.batch_object_relationships
@@ -60,8 +60,8 @@ module Ddr::Batch
       @repo_objects.each_with_index do |obj, index|
         batch_obj = batch.batch_objects[index]
         expect(obj).to be_an_instance_of(batch_obj.model.constantize)
-        expect(obj.label).to eq(batch_obj.label) if batch_obj.label
-        expect(obj.title).to eq([ 'Test Object Title' ])
+        # expect(obj.label).to eq(batch_obj.label) if batch_obj.label
+        expect(obj.dc_title).to eq([ 'Test Object Title' ])
         expect(obj.update_events.last.user_key).to eq(bp_user.user_key)
         batch_obj_ds = batch_obj.batch_object_datastreams
         batch_obj_ds.each { |d| expect(obj.datastreams[d.name].content).to_not be_nil }
@@ -138,8 +138,8 @@ module Ddr::Batch
     context "update" do
       let(:batch) { FactoryGirl.create(:batch_with_basic_update_batch_object) }
       let(:repo_object) do
-        r_obj = TestModelOmnibus.new(:pid => batch.batch_objects.first.pid, :label => 'Object Label')
-        r_obj.add_file("#{Rails.root}/spec/fixtures/imageA.tif", Ddr::Datastreams::CONTENT)
+        r_obj = TestModelOmnibus.new(:pid => batch.batch_objects.first.pid)
+        r_obj.add_file("#{Rails.root}/spec/fixtures/imageA.tif", path: Ddr::Datastreams::CONTENT)
         r_obj.save
         r_obj
       end

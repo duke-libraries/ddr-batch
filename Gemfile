@@ -14,3 +14,6 @@ gem "devise"
 
 # To use debugger
 # gem 'debugger'
+
+gem 'active-fedora', github: 'projecthydra/active_fedora', ref: 'f85b4eab16f45cb4c1491a27bb20b05821bd9c44'
+gem 'ddr-models', github: 'duke-libraries/ddr-models', ref: '6225d0be91d8ada022cb5a95601de40a5769ce73'
