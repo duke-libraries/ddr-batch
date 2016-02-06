@@ -2,7 +2,7 @@ require "rails_helper"
 
 module Ddr::Batch
 
-  describe BatchProcessorRunMailer, type: :mailer, batch: true do
+  RSpec.describe BatchProcessorRunMailer, type: :mailer, batch: true do
     let(:user) { FactoryGirl.create(:user) }
     let(:batch) { Ddr::Batch::Batch.new(id: 54,
                                         user_id: user.id,

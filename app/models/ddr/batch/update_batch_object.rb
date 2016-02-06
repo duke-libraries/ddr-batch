@@ -77,7 +77,7 @@ module Ddr::Batch
           end
         end
         if repo_object.save
-          repo_object.notify_event(:update, user: user, comment: event_log_comment)
+          repo_object.notify_event(:update, user_key: user.user_key, comment: event_log_comment)
         end
       rescue Exception => e
         logger.error("Error in updating repository object #{pid} for #{identifier} : : #{e}")

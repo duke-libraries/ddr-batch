@@ -2,19 +2,19 @@ require 'rails_helper'
 
 module Ddr::Batch
 
-  shared_examples "a valid ingest object" do
+  RSpec.shared_examples "a valid ingest object" do
     it "should be valid" do
       expect(object.validate).to be_empty
     end
   end
 
-  shared_examples "an invalid ingest object" do
+  RSpec.shared_examples "an invalid ingest object" do
     it "should not be valid" do
       expect(object.validate).to include(error_message)
     end
   end
 
-  shared_examples "a successful ingest" do
+  RSpec.shared_examples "a successful ingest" do
     let(:repo_object) { ActiveFedora::Base.find(object.pid) }
     let(:verification_event) { repo_object.events.select { |e| e.is_a? Ddr::Events::ValidationEvent }.first }
     before { object.process(user) }
@@ -28,7 +28,7 @@ module Ddr::Batch
     end
   end
 
-  describe IngestBatchObject, type: :model, batch: true, ingest: true do
+  RSpec.describe IngestBatchObject, type: :model, batch: true, ingest: true do
 
     context "validate" do
 

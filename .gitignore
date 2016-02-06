@@ -10,4 +10,5 @@ spec/dummy/log/*.txt
 spec/dummy/public/system/
 spec/dummy/tmp/
 spec/dummy/.sass-cache
+spec/examples.txt
 tmp
