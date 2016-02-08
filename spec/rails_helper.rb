@@ -6,11 +6,13 @@ abort("The Rails environment is running in production mode!") if Rails.env.produ
 require 'spec_helper'
 require 'rspec/rails'
 # Add additional requires below this line. Rails is not loaded until this point!
+require "ddr/batch"
 require "capybara/rails"
 require "capybara/rspec"
 require "ddr/auth/test_helpers"
 require "factory_girl_rails"
 require "database_cleaner"
+require "active_fedora/cleaner"
 
 Resque.inline = true
 
@@ -68,10 +70,10 @@ RSpec.configure do |config|
 
   config.before(:suite) do
     DatabaseCleaner.clean
-    ActiveFedora::Base.destroy_all
+    ActiveFedora::Cleaner.clean!
   end
 
-  config.after(:each) { ActiveFedora::Base.destroy_all }
+  config.after(:each) { ActiveFedora::Cleaner.clean! }
   config.after(:each, type: :feature) { Warden.test_reset! }
 
 end

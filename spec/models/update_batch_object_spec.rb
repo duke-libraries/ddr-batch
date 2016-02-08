@@ -2,25 +2,25 @@ require 'rails_helper'
 
 module Ddr::Batch
 
-  shared_examples "a valid update object" do
+  RSpec.shared_examples "a valid update object" do
     it "should be valid" do
       expect(object.validate).to be_empty
     end
   end
 
-  shared_examples "an invalid update object" do
+  RSpec.shared_examples "an invalid update object" do
     it "should not be valid" do
       expect(object.validate).to include(error_message)
     end
   end
 
-  shared_examples "a loggable event has occurred" do
+  RSpec.shared_examples "a loggable event has occurred" do
     it "should log the event" do
       expect(repo_object.update_events.last.comment).to eq("Updated by batch process (Batch #{object.batch.id}, BatchObject #{object.id})")
     end
   end
 
-  describe UpdateBatchObject, type: :model, batch: true do
+  RSpec.describe UpdateBatchObject, type: :model, batch: true do
 
     let(:object) { batch.batch_objects.first }
 
@@ -31,7 +31,7 @@ module Ddr::Batch
       context "valid object" do
         let(:repo_object) { TestModel.new(:pid => object.pid) }
         before do
-          repo_object.roles.grant({ type: 'MetadataEditor', agent: batch.user.user_key, scope: 'resource' })
+          repo_object.roles.grant({ role_type: 'MetadataEditor', agent: batch.user.user_key, scope: 'resource' })
           repo_object.save!
         end
         context "generic object" do
@@ -67,7 +67,7 @@ module Ddr::Batch
     context "update" do
       let(:repo_object) { TestModel.create(pid: object.pid, dc_title: [ "Test Model Title" ], dc_identifier: [ "id1", "id2" ]) }
       before do
-        repo_object.roles.grant({ type: 'MetadataEditor', agent: batch.user.user_key, scope: 'resource' })
+        repo_object.roles.grant({ role_type: 'MetadataEditor', agent: batch.user.user_key, scope: 'resource' })
         repo_object.save!
         object.process(batch.user)
         repo_object.reload

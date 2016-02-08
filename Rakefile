@@ -34,3 +34,5 @@ task :ci => ["jetty:clean"] do
     Rake::Task['spec'].invoke
   end
 end
+
+task :default => :spec

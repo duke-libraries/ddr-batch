@@ -6,7 +6,6 @@ module Ddr::Batch
 
     DATASTREAMS = [ Ddr::Datastreams::CONTENT,
                     Ddr::Datastreams::DESC_METADATA,
-                    Ddr::Datastreams::RIGHTS_METADATA,
                     Ddr::Datastreams::STRUCT_METADATA ]
 
     OPERATION_ADD = "ADD" # add this datastream to the object -- considered an error if datastream already exists

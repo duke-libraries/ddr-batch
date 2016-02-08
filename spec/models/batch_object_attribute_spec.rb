@@ -2,7 +2,7 @@ require 'rails_helper'
 
 module Ddr::Batch
 
-  shared_examples "an invalid batch object attribute object" do
+  RSpec.shared_examples "an invalid batch object attribute object" do
     before { object.valid? }
     it "shouild report the appropriate error" do
       expect(object.errors.keys).to include(error_key)

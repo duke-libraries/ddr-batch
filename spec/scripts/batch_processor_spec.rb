@@ -2,7 +2,7 @@ require 'rails_helper'
 
 module Ddr::Batch
 
-  shared_examples "a successful ingest batch" do
+  RSpec.shared_examples "a successful ingest batch" do
     let(:log_contents) { File.read(batch.logfile.path) }
     before do
       batch.reload
@@ -48,7 +48,7 @@ module Ddr::Batch
     end
   end
 
-  shared_examples "a successful update batch" do
+  RSpec.shared_examples "a successful update batch" do
     let(:log_contents) { File.read(batch.logfile.path) }
     before do
       batch.reload
@@ -80,7 +80,7 @@ module Ddr::Batch
     end
   end
 
-  shared_examples "an interrupted batch run" do
+  RSpec.shared_examples "an interrupted batch run" do
     before { batch.reload }
     it "should have an interrupted status and a failed outcome" do
       expect([Batch::STATUS_INTERRUPTED, Batch::STATUS_RESTARTABLE]).to include(batch.status)
@@ -91,7 +91,7 @@ module Ddr::Batch
     end
   end
 
-  shared_examples "an invalid batch" do
+  RSpec.shared_examples "an invalid batch" do
     before { batch.reload }
     it "should have an invalid status and a failed outcome" do
       expect(batch.status).to eq(Batch::STATUS_INVALID)
@@ -102,7 +102,7 @@ module Ddr::Batch
     end
   end
 
-  describe BatchProcessor do
+  RSpec.describe BatchProcessor do
     let(:test_dir) { Dir.mktmpdir("dul_hydra_test") }
     let(:log_dir) { test_dir }
     let(:bp_user) { FactoryGirl.create(:user) }
@@ -145,7 +145,7 @@ module Ddr::Batch
       end
       let(:bp) { BatchProcessor.new(batch, bp_user, log_dir: log_dir) }
       before do
-        repo_object.roles.grant({ type: 'MetadataEditor', agent: batch.user.user_key, scope: 'resource' })
+        repo_object.roles.grant({ role_type: 'MetadataEditor', agent: batch.user.user_key, scope: 'resource' })
         repo_object.save
       end
       context "successful update" do

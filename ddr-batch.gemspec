@@ -28,4 +28,5 @@ Gem::Specification.new do |s|
   s.add_development_dependency "capybara", "~> 2.0"
   s.add_development_dependency "jettywrapper", "~> 2.0"
   s.add_development_dependency "database_cleaner"
+  s.add_development_dependency "blacklight", "~> 5.15.0"
 end

@@ -2,7 +2,7 @@ require 'rails_helper'
 
 module Ddr::Batch
 
-  describe Batch, type: :model, batch: true do
+  RSpec.describe Batch, type: :model, batch: true do
 
     let(:batch) { FactoryGirl.create(:batch_with_basic_ingest_batch_objects) }
 
