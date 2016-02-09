@@ -30,6 +30,7 @@ module Ddr::Batch
       expect(ActionMailer::Base.deliveries).not_to be_empty
       email = ActionMailer::Base.deliveries.first
       expect(email.to).to eq([user.email])
+      expect(email.from).to eq(['test@test.lib.inst.edu'])
       expect(email.subject).to include("Batch Processor Run #{batch.status}")
       expect(email.parts.first.to_s).to include("Ingested TestModel")
       expect(email.parts.second.to_s).to include("Objects in batch: #{batch.batch_objects.count}")
