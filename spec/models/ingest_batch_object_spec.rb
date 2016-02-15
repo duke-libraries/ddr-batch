@@ -138,31 +138,63 @@ module Ddr::Batch
           end
           context "relationship with record ID object" do
             let(:batch) { Ddr::Batch::Batch.create }
-            let(:parent_repo_object) { TestParent.create }
-            let(:parent_object) do
-              Ddr::Batch::IngestBatchObject.create(
-                  batch: batch,
-                  model: 'TestParent',
-                  pid: parent_repo_object.id)
+            context "pointing to another batch object" do
+              let(:parent_repo_object) { TestParent.create }
+              let(:parent_object) do
+                Ddr::Batch::IngestBatchObject.create(
+                    batch: batch,
+                    model: 'TestParent',
+                    pid: parent_repo_object.id)
+              end
+              let(:object) do
+                Ddr::Batch::IngestBatchObject.create(
+                    batch: batch,
+                    model: 'TestChild')
+              end
+              let(:relationship) do
+                BatchObjectRelationship.new(
+                    operation: BatchObjectRelationship::OPERATION_ADD,
+                    name: BatchObjectRelationship::RELATIONSHIP_PARENT,
+                    object_type: BatchObjectRelationship::OBJECT_TYPE_REC_ID,
+                    object:parent_object.id
+                )
+              end
+              before do
+                object.batch_object_relationships << relationship
+                object.save
+              end
+              it_behaves_like "a successful ingest"
             end
-            let(:object) do
-              Ddr::Batch::IngestBatchObject.create(
-                  batch: batch,
-                  model: 'TestChild')
+            context "pointing to current batch object" do
+              let(:object) do
+                Ddr::Batch::IngestBatchObject.create(
+                    batch: batch,
+                    model: 'Collection')
+              end
+              let(:attribute) do
+                BatchObjectAttribute.new(
+                    operation: BatchObjectAttribute::OPERATION_ADD,
+                    datastream: Ddr::Datastreams::DESC_METADATA,
+                    name: 'title',
+                    value: 'Test Object Title',
+                    value_type: Ddr::Batch::BatchObjectAttribute::VALUE_TYPE_STRING
+                )
+              end
+              let(:relationship) do
+                BatchObjectRelationship.new(
+                    operation: BatchObjectRelationship::OPERATION_ADD,
+                    name: BatchObjectRelationship::RELATIONSHIP_ADMIN_POLICY,
+                    object_type: BatchObjectRelationship::OBJECT_TYPE_REC_ID,
+                    object: object.id
+                )
+              end
+              before do
+                object.batch_object_attributes << attribute
+                object.batch_object_relationships << relationship
+                object.save
+              end
+              it_behaves_like "a successful ingest"
             end
-            let(:relationship) do
-              BatchObjectRelationship.new(
-                operation: BatchObjectRelationship::OPERATION_ADD,
-                name: BatchObjectRelationship::RELATIONSHIP_PARENT,
-                object_type: BatchObjectRelationship::OBJECT_TYPE_REC_ID,
-                object:parent_object.id
-              )
-            end
-            before do
-              object.batch_object_relationships << relationship
-              object.save
-            end
-            it_behaves_like "a successful ingest"
           end
         end
         context "previously ingested object (e.g., during restart)" do

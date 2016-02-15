@@ -44,7 +44,6 @@ module Ddr::Batch
           event.detail = ingest_outcome_detail.join("\n")
           event.save!
         end
-        update_attributes(:pid => repo_object.pid)
         verifications = verify_repository_object
         verification_outcome_detail = []
         verified = true
@@ -76,8 +75,8 @@ module Ddr::Batch
       repo_object = nil
       begin
         repo_object = model.constantize.new(:id => repo_pid)
-        # repo_object.label = label if label
         repo_object.save(validate: false)
+        update_attributes(:pid => repo_object.pid)
         batch_object_attributes.each { |a| repo_object = add_attribute(repo_object, a) }
         batch_object_datastreams.each { |d| repo_object = populate_datastream(repo_object, d) }
         batch_object_relationships.each { |r| repo_object = add_relationship(repo_object, r) }
@@ -94,6 +93,7 @@ module Ddr::Batch
           else
             repo_clean = true
           end
+          update_attributes(pid: nil)
         else
           repo_clean = true
         end

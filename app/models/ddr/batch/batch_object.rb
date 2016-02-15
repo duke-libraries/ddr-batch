@@ -120,7 +120,6 @@ module Ddr::Batch
         else
           verifications["Object exists in repository"] = VERIFICATION_PASS
           verifications["Object is correct model"] = verify_model(repo_object) if model
-          # verifications["Object has correct label"] = verify_label(repo_object) if label
           unless batch_object_attributes.empty?
             batch_object_attributes.each do |a|
               if a.operation == BatchObjectAttribute::OPERATION_ADD
@@ -157,10 +156,6 @@ module Ddr::Batch
         end
       end
 
-      # def verify_label(repo_object)
-      #   repo_object.label.eql?(label) ? VERIFICATION_PASS : VERIFICATION_FAIL
-      # end
-      #
       def verify_attribute(repo_object, attribute)
         verified = case attribute.datastream
           when 'descMetadata'
