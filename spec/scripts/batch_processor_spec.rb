@@ -139,7 +139,7 @@ module Ddr::Batch
       let(:batch) { FactoryGirl.create(:batch_with_basic_update_batch_object) }
       let(:repo_object) do
         r_obj = TestModelOmnibus.new(:pid => batch.batch_objects.first.pid)
-        r_obj.add_file("#{Rails.root}/spec/fixtures/imageA.tif", path: Ddr::Datastreams::CONTENT)
+        r_obj.add_file("#{Rails.root}/spec/fixtures/imageA.tif", path: Ddr::Models::File::CONTENT)
         r_obj.save
         r_obj
       end
