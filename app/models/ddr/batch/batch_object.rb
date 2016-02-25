@@ -138,8 +138,8 @@ module Ddr::Batch
               verifications["#{r.name} relationship is correct"] = verify_relationship(repo_object, r)
             end
           end
-          result = Ddr::Actions::FixityCheck.execute repo_object
-          verifications["Fixity check"] = result.success ? VERIFICATION_PASS : VERIFICATION_FAIL
+          result = repo_object.check_fixity
+          verifications["Fixity check"] = result.success? ? VERIFICATION_PASS : VERIFICATION_FAIL
         end
         verifications
       end
@@ -158,10 +158,10 @@ module Ddr::Batch
 
       def verify_attribute(repo_object, attribute)
         verified = case attribute.datastream
-          when 'descMetadata'
-            repo_object.descMetadata.values(attribute.name).include?(attribute.value)
-          when 'adminMetadata'
-            repo_object.adminMetadata.values(attribute.name).include?(attribute.value)
+          when Ddr::Models::Metadata::DESC_METADATA
+            repo_object.desc_metadata.values(attribute.name).include?(attribute.value)
+          when Ddr::Models::Metadata::ADMIN_METADATA
+            repo_object.admin_metadata.values(attribute.name).include?(attribute.value)
         end
         verified ? VERIFICATION_PASS : VERIFICATION_FAIL
       end
@@ -219,7 +219,7 @@ module Ddr::Batch
 
       def clear_attributes(repo_object, attribute)
         Ddr::Models::DescriptiveMetadata.unqualified_names.each do |term|
-          repo_object.descMetadata.set_values(term, nil) if repo_object.descMetadata.values(term)
+          repo_object.desc_metadata.set_values(term, nil) if repo_object.descMetadata.values(term)
         end
         return repo_object
       end

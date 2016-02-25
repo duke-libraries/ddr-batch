@@ -28,7 +28,7 @@ module Ddr::Batch
 
     def valid_datastream_operation
       if operation == OPERATION_CLEAR_ALL
-        unless datastream == 'descMetadata'
+        unless datastream == Ddr::Models::Metadata::DESC_METADATA
           errors.add(:operation, "Operation #{operation} is not valid for #{datastream}")
         end
       end
@@ -55,14 +55,14 @@ module Ddr::Batch
     end
 
     def datastream_valid?
-        [ 'adminMetadata', 'descMetadata' ].include?(datastream)
+        [ Ddr::Models::Metadata::ADMIN_METADATA, Ddr::Models::Metadata::DESC_METADATA ].include?(datastream)
     end
 
     def attribute_name_valid?
       case datastream
-        when 'adminMetadata'
+        when Ddr::Models::Metadata::ADMIN_METADATA
           batch_object.model.constantize.properties.include?(name)
-        when 'descMetadata'
+        when Ddr::Models::Metadata::DESC_METADATA
           Ddr::Models::DescriptiveMetadata.unqualified_names.include?(name.to_sym)
       end
     end
