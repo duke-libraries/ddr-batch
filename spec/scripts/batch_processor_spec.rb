@@ -25,8 +25,8 @@ module Ddr::Batch
           expect(event.event_date_time).to be_within(3.minutes).of(DateTime.now)
           case event.type
           when "Ddr::Events::FixityCheckEvent"
-            expect(event.detail).to include(Ddr::Events::FixityCheckEvent::VALID)
-            expect(event.detail).to_not include(Ddr::Events::FixityCheckEvent::INVALID)
+            expect(event.detail).to include('true')
+            expect(event.detail).to_not include('false')
           when "Ddr::Events::IngestionEvent"
             expect(event.summary).to include("Batch object identifier: #{batch_obj.identifier}")
             expect(event.user_key).to eq(bp_user.user_key)

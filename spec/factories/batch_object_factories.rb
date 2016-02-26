@@ -59,6 +59,12 @@ FactoryGirl.define do
     end
   end
 
+  trait :with_add_admin_metadata_attributes do
+    after(:create) do |batch_object|
+      FactoryGirl.create(:batch_object_add_admin_metadata_attribute, batch_object: batch_object)
+    end
+  end
+
   trait :with_add_desc_metadata_attributes do
     after(:create) do |batch_object|
       FactoryGirl.create(:batch_object_add_desc_metadata_attribute, batch_object: batch_object)
@@ -102,6 +108,7 @@ FactoryGirl.define do
       end
 
       factory :generic_ingest_batch_object_with_attributes do
+        with_add_admin_metadata_attributes
         with_add_desc_metadata_attributes
       end
     end
