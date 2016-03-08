@@ -29,7 +29,7 @@ module Ddr::Batch
     context "validate", validation: true do
       let(:batch) { FactoryGirl.create(:batch_with_basic_update_batch_object) }
       context "valid object" do
-        let(:repo_object) { TestModel.new(:pid => object.pid) }
+        let(:repo_object) { TestModel.new(:id => object.pid) }
         before do
           repo_object.roles.grant({ role_type: 'MetadataEditor', agent: batch.user.user_key, scope: 'resource' })
           repo_object.save!
@@ -57,7 +57,7 @@ module Ddr::Batch
           it_behaves_like "an invalid update object"
         end
         context "batch user not permitted to edit repository object" do
-          let!(:repo_object) { TestModel.create(:pid => object.pid) }
+          let!(:repo_object) { TestModel.create(:id => object.pid) }
           let(:error_message) { "#{error_prefix} #{batch.user.user_key} not permitted to edit #{object.pid}" }
           it_behaves_like "an invalid update object"
         end
@@ -65,7 +65,7 @@ module Ddr::Batch
     end
 
     context "update" do
-      let(:repo_object) { TestModel.create(pid: object.pid, dc_title: [ "Test Model Title" ], dc_identifier: [ "id1", "id2" ]) }
+      let(:repo_object) { TestModel.create(id: object.pid, dc_title: [ "Test Model Title" ], dc_identifier: [ "id1", "id2" ]) }
       before do
         repo_object.roles.grant({ role_type: 'MetadataEditor', agent: batch.user.user_key, scope: 'resource' })
         repo_object.save!

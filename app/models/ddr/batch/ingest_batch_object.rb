@@ -9,7 +9,7 @@ module Ddr::Batch
     end
 
     def model_datastream_keys
-      model.constantize.new.datastreams.keys
+      model.constantize.new.attached_files.keys
     end
 
     def process(user, opts = {})
@@ -31,7 +31,7 @@ module Ddr::Batch
       repo_object = create_repository_object
       if !repo_object.nil? && !repo_object.new_record?
         ingest_outcome_detail = []
-        ingest_outcome_detail << "Ingested #{model} #{identifier} into #{repo_object.pid}"
+        ingest_outcome_detail << "Ingested #{model} #{identifier} into #{repo_object.id}"
         Ddr::Events::IngestionEvent.new.tap do |event|
           event.object = repo_object
           event.user = user
@@ -76,7 +76,7 @@ module Ddr::Batch
       begin
         repo_object = model.constantize.new(:id => repo_pid)
         repo_object.save(validate: false)
-        update_attributes(:pid => repo_object.pid)
+        update_attributes(:pid => repo_object.id)
         batch_object_attributes.each { |a| repo_object = add_attribute(repo_object, a) }
         batch_object_datastreams.each { |d| repo_object = populate_datastream(repo_object, d) }
         batch_object_relationships.each { |r| repo_object = add_relationship(repo_object, r) }

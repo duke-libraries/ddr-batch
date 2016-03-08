@@ -204,7 +204,7 @@ module Ddr::Batch
             object.pid = assigned_pid
             object.verified = true
             object.save
-            repo_object = object.model.constantize.new(:pid => assigned_pid, dc_title: ["Test Object Title"])
+            repo_object = object.model.constantize.new(:id => assigned_pid, dc_title: ["Test Object Title"])
             repo_object.save(validate: false)
           end
           it_behaves_like "a successful ingest"
