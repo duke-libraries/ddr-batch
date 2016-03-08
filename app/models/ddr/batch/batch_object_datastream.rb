@@ -5,7 +5,7 @@ module Ddr::Batch
     belongs_to :batch_object, :inverse_of => :batch_object_datastreams
 
     DATASTREAMS = [ Ddr::Models::File::CONTENT,
-                    Ddr::Models::File::DESC_METADATA,
+                    Ddr::Models::Metadata::DESC_METADATA,
                     Ddr::Models::File::STRUCT_METADATA ]
 
     OPERATION_ADD = "ADD" # add this datastream to the object -- considered an error if datastream already exists

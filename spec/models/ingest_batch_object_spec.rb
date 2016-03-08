@@ -174,7 +174,7 @@ module Ddr::Batch
               let(:attribute) do
                 BatchObjectAttribute.new(
                     operation: BatchObjectAttribute::OPERATION_ADD,
-                    datastream: Ddr::Datastreams::DESC_METADATA,
+                    datastream: Ddr::Models::Metadata::DESC_METADATA,
                     name: 'title',
                     value: 'Test Object Title',
                     value_type: Ddr::Batch::BatchObjectAttribute::VALUE_TYPE_STRING
