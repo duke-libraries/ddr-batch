@@ -17,8 +17,8 @@ require 'deprecation'
 # users commonly want.
 #
 # Silence deprecation warnings
-warn "Default deprecation behavior set to :silence!"
-Deprecation.default_deprecation_behavior = :silence
+# warn "Default deprecation behavior set to :silence!"
+# Deprecation.default_deprecation_behavior = :silence
 
 # See http://rubydoc.info/gems/rspec-core/RSpec/Core/Configuration
 RSpec.configure do |config|
