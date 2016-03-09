@@ -167,8 +167,8 @@ module Ddr::Batch
       end
 
       def verify_datastream(repo_object, datastream)
-        if repo_object.datastreams.include?(datastream.name) &&
-            repo_object.datastreams[datastream.name].has_content?
+        if repo_object.attached_files.include?(datastream.name) &&
+            repo_object.attached_files[datastream.name].has_content?
           VERIFICATION_PASS
         else
           VERIFICATION_FAIL
@@ -176,7 +176,7 @@ module Ddr::Batch
       end
 
       def verify_datastream_external_checksum(repo_object, datastream)
-        repo_object.datastreams[datastream.name].validate_checksum! datastream.checksum, datastream.checksum_type
+        repo_object.attached_files[datastream.name].validate_checksum! datastream.checksum, datastream.checksum_type
         return VERIFICATION_PASS
       rescue Ddr::Models::ChecksumInvalid
         return VERIFICATION_FAIL
@@ -199,7 +199,7 @@ module Ddr::Batch
         relationship_object_class = Ddr::Utils.reflection_object_class(relationship_reflection)
         relationship_object = repo_object.send(relationship.name)
         if !relationship_object.nil? &&
-            relationship_object.pid.eql?(repo_object_id) &&
+            relationship_object.id.eql?(repo_object_id) &&
             relationship_object.is_a?(relationship_object_class)
           VERIFICATION_PASS
         else
@@ -219,7 +219,7 @@ module Ddr::Batch
 
       def clear_attributes(repo_object, attribute)
         Ddr::Models::DescriptiveMetadata.unqualified_names.each do |term|
-          repo_object.desc_metadata.set_values(term, nil) if repo_object.descMetadata.values(term)
+          repo_object.desc_metadata.set_values(term, nil) if repo_object.desc_metadata.values(term)
         end
         return repo_object
       end
@@ -228,12 +228,12 @@ module Ddr::Batch
         case datastream[:payload_type]
         when BatchObjectDatastream::PAYLOAD_TYPE_BYTES
           ds_content = datastream[:payload]
-          if repo_object.datastreams[datastream[:name]].is_a? ActiveFedora::RDFDatastream
+          if repo_object.attached_files[datastream[:name]].is_a? ActiveFedora::RDFDatastream
             ds_content = set_rdf_subject(repo_object, ds_content)
           end
-          repo_object.datastreams[datastream[:name]].content = ds_content
+          repo_object.attached_files[datastream[:name]].content = ds_content
         when BatchObjectDatastream::PAYLOAD_TYPE_FILENAME
-          if repo_object.datastreams[datastream[:name]].is_a? ActiveFedora::RDFDatastream
+          if repo_object.attached_files[datastream[:name]].is_a? ActiveFedora::RDFDatastream
             ds_content = set_rdf_subject(repo_object, File.read(datastream[:payload]))
             mime_type = "application/n-triples"
           else

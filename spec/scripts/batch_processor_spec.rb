@@ -16,12 +16,12 @@ module Ddr::Batch
         expect(obj).to be_an_instance_of(batch_obj.model.constantize)
         # expect(obj.label).to eq(batch_obj.label) if batch_obj.label
         batch_obj_ds = batch_obj.batch_object_datastreams
-        batch_obj_ds.each { |d| expect(obj.datastreams[d.name].content).to_not be_nil }
+        batch_obj_ds.each { |d| expect(obj.attached_files[d.name].content).to_not be_nil }
         batch_obj_rs = batch_obj.batch_object_relationships
-        batch_obj_rs.each { |r| expect(obj.send(r.name).pid).to eq(r.object) }
+        batch_obj_rs.each { |r| expect(obj.send(r.name).id).to eq(r.object) }
         obj.events.each do |event|
           expect(event).to be_success unless event.is_a?(Ddr::Events::VirusCheckEvent)
-          expect(event.pid).to eq(obj.pid)
+          expect(event.pid).to eq(obj.id)
           expect(event.event_date_time).to be_within(3.minutes).of(DateTime.now)
           case event.type
           when "Ddr::Events::FixityCheckEvent"
@@ -138,7 +138,7 @@ module Ddr::Batch
     context "update" do
       let(:batch) { FactoryGirl.create(:batch_with_basic_update_batch_object) }
       let(:repo_object) do
-        r_obj = TestModelOmnibus.new(:pid => batch.batch_objects.first.pid)
+        r_obj = TestModelOmnibus.new(:id => batch.batch_objects.first.pid)
         r_obj.add_file("#{Rails.root}/spec/fixtures/imageA.tif", path: Ddr::Models::File::CONTENT)
         r_obj.save
         r_obj
