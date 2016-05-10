@@ -15,4 +15,4 @@ gem "devise"
 # To use debugger
 # gem 'debugger'
 
-gem 'ddr-models', '3.0.0'
+gem 'ddr-models', github: 'duke-libraries/ddr-models', ref: '546f4d82c2e6bf37ac812e486e1da971108eacff'

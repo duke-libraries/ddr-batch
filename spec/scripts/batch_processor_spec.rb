@@ -15,8 +15,8 @@ module Ddr::Batch
         batch_obj = batch.batch_objects[index]
         expect(obj).to be_an_instance_of(batch_obj.model.constantize)
         # expect(obj.label).to eq(batch_obj.label) if batch_obj.label
-        batch_obj_ds = batch_obj.batch_object_datastreams
-        batch_obj_ds.each { |d| expect(obj.attached_files[d.name].content).to_not be_nil }
+        batch_obj_files = batch_obj.batch_object_files
+        batch_obj_files.each { |f| expect(obj.attached_files[f.name].content).to_not be_nil }
         batch_obj_rs = batch_obj.batch_object_relationships
         batch_obj_rs.each { |r| expect(obj.send(r.name).id).to eq(r.object) }
         obj.events.each do |event|
@@ -63,8 +63,8 @@ module Ddr::Batch
         # expect(obj.label).to eq(batch_obj.label) if batch_obj.label
         expect(obj.dc_title).to eq([ 'Test Object Title' ])
         expect(obj.update_events.last.user_key).to eq(bp_user.user_key)
-        batch_obj_ds = batch_obj.batch_object_datastreams
-        batch_obj_ds.each { |d| expect(obj.datastreams[d.name].content).to_not be_nil }
+        batch_obj_files = batch_obj.batch_object_files
+        batch_obj_files.each { |f| expect(obj.attached_files[f.name].content).to_not be_nil }
         batch_obj_rs = batch_obj.batch_object_relationships
         batch_obj_rs.each { |r| expect(obj.send(r.name).pid).to eq(r.object) }
       end
@@ -129,7 +129,7 @@ module Ddr::Batch
       end
       context "exception during run" do
         before do
-          allow_any_instance_of(IngestBatchObject).to receive(:populate_datastream).and_raise(RuntimeError)
+          allow_any_instance_of(IngestBatchObject).to receive(:populate_file).and_raise(RuntimeError)
           bp.execute
         end
         it_behaves_like "an interrupted batch run"

@@ -15,11 +15,11 @@ module Ddr::Batch
       errs
     end
 
-    def model_datastream_keys
+    def model_file_keys
       if pid
         begin
           obj = ActiveFedora::Base.find(pid, :cast => true)
-          obj.datastreams.keys
+          obj.attached_files.keys
         rescue
           nil
         end
@@ -70,10 +70,10 @@ module Ddr::Batch
             clear_attributes(repo_object, a)
           end
         end
-        batch_object_datastreams.each do |d|
+        batch_object_files.each do |d|
           repo_object = case
-          when d.operation.eql?(BatchObjectDatastream::OPERATION_ADDUPDATE)
-            populate_datastream(repo_object, d)
+          when d.operation.eql?(BatchObjectFile::OPERATION_ADDUPDATE)
+            populate_file(repo_object, d)
           end
         end
         if repo_object.save

@@ -6,7 +6,7 @@ module Ddr::Batch
 
       belongs_to :batch, inverse_of: :batch_objects
       has_many :batch_object_attributes, -> { order "id ASC" }, inverse_of: :batch_object, dependent: :destroy
-      has_many :batch_object_datastreams, inverse_of: :batch_object, dependent: :destroy
+      has_many :batch_object_files, inverse_of: :batch_object, dependent: :destroy
       has_many :batch_object_relationships, inverse_of: :batch_object, dependent: :destroy
 
       VERIFICATION_PASS = "PASS"
@@ -38,7 +38,7 @@ module Ddr::Batch
       def validate
         errors = []
         errors += validate_model if model
-        errors += validate_datastreams if batch_object_datastreams
+        errors += validate_files if batch_object_files
         errors += validate_relationships if batch_object_relationships
         errors += local_validations
         return errors
@@ -48,7 +48,7 @@ module Ddr::Batch
         []
       end
 
-      def model_datastream_keys
+      def model_file_keys
         raise NotImplementedError
       end
 
@@ -74,28 +74,28 @@ module Ddr::Batch
         return errs
       end
 
-      def validate_datastreams
+      def validate_files
         errs = []
-        batch_object_datastreams.each do |d|
-          if model_datastream_keys.present?
-            unless model_datastream_keys.include?(d.name.to_sym)
-              errs << "#{error_prefix} Invalid datastream name for #{model}: #{d.name}"
+        batch_object_files.each do |f|
+          if model_file_keys.present?
+            unless model_file_keys.include?(f.name.to_sym)
+              errs << "#{error_prefix} Invalid file name for #{model}: #{f.name}"
             end
           end
-          unless BatchObjectDatastream::PAYLOAD_TYPES.include?(d.payload_type)
-            errs << "#{error_prefix} Invalid payload type for #{d.name} datastream: #{d.payload_type}"
+          unless BatchObjectFile::PAYLOAD_TYPES.include?(f.payload_type)
+            errs << "#{error_prefix} Invalid payload type for #{f.name} file: #{f.payload_type}"
           end
-          if d.payload_type.eql?(BatchObjectDatastream::PAYLOAD_TYPE_FILENAME)
-            unless File.readable?(d.payload)
-              errs << "#{error_prefix} Missing or unreadable file for #{d[:name]} datastream: #{d[:payload]}"
+          if f.payload_type.eql?(BatchObjectFile::PAYLOAD_TYPE_FILENAME)
+            unless File.readable?(f.payload)
+              errs << "#{error_prefix} Missing or unreadable file for #{f[:name]} file: #{f[:payload]}"
             end
           end
-          if d.checksum && !d.checksum_type
-            errs << "#{error_prefix} Must specify checksum type if providing checksum for #{d.name} datastream"
+          if f.checksum && !f.checksum_type
+            errs << "#{error_prefix} Must specify checksum type if providing checksum for #{f.name} file"
           end
-          if d.checksum_type
-            unless Ddr::Datastreams::CHECKSUM_TYPES.include?(d.checksum_type)
-              errs << "#{error_prefix} Invalid checksum type for #{d.name} datastream: #{d.checksum_type}"
+          if f.checksum_type
+            unless f.checksum_type == Ddr::Models::File::CHECKSUM_TYPE_SHA1
+              errs << "#{error_prefix} Invalid checksum type for #{f.name} file: #{f.checksum_type}"
             end
           end
         end
@@ -127,10 +127,10 @@ module Ddr::Batch
               end
             end
           end
-          unless batch_object_datastreams.empty?
-            batch_object_datastreams.each do |d|
-              verifications["#{d.name} datastream present and not empty"] = verify_datastream(repo_object, d)
-              verifications["#{d.name} external checksum match"] = verify_datastream_external_checksum(repo_object, d) if d.checksum
+          unless batch_object_files.empty?
+            batch_object_files.each do |d|
+              verifications["#{d.name} file present and not empty"] = verify_file(repo_object, d)
+              verifications["#{d.name} external checksum match"] = verify_file_external_checksum(repo_object, d) if d.checksum
             end
           end
           unless batch_object_relationships.empty?
@@ -157,7 +157,7 @@ module Ddr::Batch
       end
 
       def verify_attribute(repo_object, attribute)
-        verified = case attribute.datastream
+        verified = case attribute.metadata
           when Ddr::Models::Metadata::DESC_METADATA
             repo_object.desc_metadata.values(attribute.name).include?(attribute.value)
           when Ddr::Models::Metadata::ADMIN_METADATA
@@ -166,17 +166,17 @@ module Ddr::Batch
         verified ? VERIFICATION_PASS : VERIFICATION_FAIL
       end
 
-      def verify_datastream(repo_object, datastream)
-        if repo_object.attached_files.include?(datastream.name) &&
-            repo_object.attached_files[datastream.name].has_content?
+      def verify_file(repo_object, file)
+        if repo_object.attached_files.include?(file.name) &&
+            repo_object.attached_files[file.name].has_content?
           VERIFICATION_PASS
         else
           VERIFICATION_FAIL
         end
       end
 
-      def verify_datastream_external_checksum(repo_object, datastream)
-        repo_object.attached_files[datastream.name].validate_checksum! datastream.checksum, datastream.checksum_type
+      def verify_file_external_checksum(repo_object, file)
+        repo_object.attached_files[file.name].validate_checksum! file.checksum, file.checksum_type
         return VERIFICATION_PASS
       rescue Ddr::Models::ChecksumInvalid
         return VERIFICATION_FAIL
@@ -208,12 +208,12 @@ module Ddr::Batch
       end
 
       def add_attribute(repo_object, attribute)
-        repo_object.send(attribute.datastream).add_value(attribute.name, attribute.value)
+        repo_object.send(attribute.metadata).add_value(attribute.name, attribute.value)
         return repo_object
       end
 
       def clear_attribute(repo_object, attribute)
-        repo_object.send(attribute.datastream).set_values(attribute.name, nil)
+        repo_object.send(attribute.metadata).set_values(attribute.name, nil)
         return repo_object
       end
 
@@ -224,26 +224,16 @@ module Ddr::Batch
         return repo_object
       end
 
-      def populate_datastream(repo_object, datastream)
-        case datastream[:payload_type]
-        when BatchObjectDatastream::PAYLOAD_TYPE_BYTES
-          ds_content = datastream[:payload]
-          if repo_object.attached_files[datastream[:name]].is_a? ActiveFedora::RDFDatastream
-            ds_content = set_rdf_subject(repo_object, ds_content)
-          end
-          repo_object.attached_files[datastream[:name]].content = ds_content
-        when BatchObjectDatastream::PAYLOAD_TYPE_FILENAME
-          if repo_object.attached_files[datastream[:name]].is_a? ActiveFedora::RDFDatastream
-            ds_content = set_rdf_subject(repo_object, File.read(datastream[:payload]))
-            mime_type = "application/n-triples"
-          else
-            ds_content = File.new(datastream[:payload])
-          end
-          file_name = File.basename(datastream[:payload])
-          dsid = datastream[:name]
-          opts = { filename: file_name }
-          opts.merge({ mime_type: mime_type }) if mime_type
-          repo_object.add_file(ds_content, path: dsid)
+      def populate_file(repo_object, file)
+        case file[:payload_type]
+        when BatchObjectFile::PAYLOAD_TYPE_BYTES
+          file_content = file[:payload]
+          repo_object.attached_files[file[:name]].content = file_content
+        when BatchObjectFile::PAYLOAD_TYPE_FILENAME
+          file_content = File.new(file[:payload])
+          file_name = File.basename(file[:payload])
+          file_id = file[:name]
+          repo_object.add_file(file_content, path: file_id)
         end
         return repo_object
       end
@@ -265,9 +255,9 @@ module Ddr::Batch
         return repo_object
       end
 
-      def set_rdf_subject(repo_object, ds_content)
+      def set_rdf_subject(repo_object, file_content)
         graph = RDF::Graph.new
-        RDF::Reader.for(:ntriples).new(ds_content) do |reader|
+        RDF::Reader.for(:ntriples).new(file_content) do |reader|
           reader.each_statement do |statement|
             if statement.subject.is_a? RDF::Node
               statement.subject = RDF::URI(repo_object.internal_uri)

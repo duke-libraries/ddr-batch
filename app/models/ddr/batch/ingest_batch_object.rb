@@ -8,7 +8,7 @@ module Ddr::Batch
       errors
     end
 
-    def model_datastream_keys
+    def model_file_keys
       model.constantize.new.attached_files.keys
     end
 
@@ -78,7 +78,7 @@ module Ddr::Batch
         repo_object.save(validate: false)
         update_attributes(:pid => repo_object.id)
         batch_object_attributes.each { |a| repo_object = add_attribute(repo_object, a) }
-        batch_object_datastreams.each { |d| repo_object = populate_datastream(repo_object, d) }
+        batch_object_files.each { |d| repo_object = populate_file(repo_object, d) }
         batch_object_relationships.each { |r| repo_object = add_relationship(repo_object, r) }
         repo_object.save
       rescue Exception => e1

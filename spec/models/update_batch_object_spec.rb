@@ -87,12 +87,11 @@ module Ddr::Batch
             expect(repo_object.dc_title).to be_empty
           end
         end
-        # Can't really test just clearing all attributes because can't save datastream with no content
-        context "clear all and add" do
-          let(:batch) { FactoryGirl.create(:batch_with_basic_clear_all_and_add_batch_object) }
+        context "clear all" do
+          let(:batch) { FactoryGirl.create(:batch_with_basic_clear_all_batch_object) }
           it_behaves_like "a loggable event has occurred"
-          it "should clear the existing attributes from the repository object and add an attribute value" do
-            expect(repo_object.dc_title).to eq( [ 'Test Object Title' ] )
+          it "should clear the existing attributes from the repository object" do
+            expect(repo_object.dc_title).to be_empty
             expect(repo_object.dc_identifier).to be_empty
           end
         end

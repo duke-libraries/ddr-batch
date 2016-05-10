@@ -14,32 +14,32 @@ module Ddr::Batch
     describe "validation" do
       let(:batch_object) { BatchObject.new(model: 'TestModel') }
       context "invalid" do
-        context "datastream" do
-          let(:error_key) { :datastream }
-          let(:object) { BatchObjectAttribute.new(batch_object: batch_object, datastream: 'foo', name: 'bar') }
+        context "metadata" do
+          let(:error_key) { :metadata }
+          let(:object) { BatchObjectAttribute.new(batch_object: batch_object, metadata: 'foo', name: 'bar') }
           it_should_behave_like 'an invalid batch object attribute object'
         end
         context "name" do
           let(:error_key) { :name }
           let(:object) { BatchObjectAttribute.new(batch_object: batch_object,
-                                                  datastream: Ddr::Models::Metadata::DESC_METADATA, name: 'bar') }
+                                                  metadata: Ddr::Models::Metadata::DESC_METADATA, name: 'bar') }
           it_should_behave_like 'an invalid batch object attribute object'
         end
         context "operation" do
           context "clear all" do
-            context "desc_metadata datastream" do
+            context "desc_metadata metadata" do
               let(:object) { BatchObjectAttribute.new(batch_object: batch_object,
-                                                      datastream: Ddr::Models::Metadata::DESC_METADATA,
+                                                      metadata: Ddr::Models::Metadata::DESC_METADATA,
                                                       operation: BatchObjectAttribute::OPERATION_CLEAR_ALL)
                            }
               it "should be valid" do
                 expect(object.valid?).to be_truthy
               end
             end
-            context "admin_metadata datastream" do
+            context "admin_metadata metadata" do
               let(:error_key) { :operation }
               let(:object) { BatchObjectAttribute.new(batch_object: batch_object,
-                                                      datastream: Ddr::Models::Metadata::ADMIN_METADATA,
+                                                      metadata: Ddr::Models::Metadata::ADMIN_METADATA,
                                                       operation: BatchObjectAttribute::OPERATION_CLEAR_ALL)
               }
               it_should_behave_like 'an invalid batch object attribute object'

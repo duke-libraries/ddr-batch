@@ -31,7 +31,7 @@ module Ddr::Batch
       it "should destroy all the associated dependent objects" do
         expect(Batch.all).to be_empty
         expect(BatchObject.all).to be_empty
-        expect(BatchObjectDatastream.all).to be_empty
+        expect(BatchObjectFile.all).to be_empty
         expect(BatchObjectRelationship.all).to be_empty
       end
     end

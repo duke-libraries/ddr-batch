@@ -41,21 +41,21 @@ FactoryGirl.define do
     end
   end
 
-  trait :with_add_content_datastream do
+  trait :with_add_content_file do
     after(:create) do |batch_object|
-      FactoryGirl.create(:batch_object_add_content_datastream, :batch_object => batch_object)
+      FactoryGirl.create(:batch_object_add_content_file, :batch_object => batch_object)
     end
   end
 
-  trait :with_add_extracted_text_datastream_bytes do
+  trait :with_add_extracted_text_file_bytes do
     after(:create) do |batch_object|
-      FactoryGirl.create(:batch_object_add_extracted_text_datastream_bytes, :batch_object => batch_object)
+      FactoryGirl.create(:batch_object_add_extracted_text_file_bytes, :batch_object => batch_object)
     end
   end
 
-  trait :with_add_extracted_text_datastream_file do
+  trait :with_add_extracted_text_file_file do
     after(:create) do |batch_object|
-      FactoryGirl.create(:batch_object_add_extracted_text_datastream_file, :batch_object => batch_object)
+      FactoryGirl.create(:batch_object_add_extracted_text_file_file, :batch_object => batch_object)
     end
   end
 
@@ -89,7 +89,7 @@ FactoryGirl.define do
 
     factory :basic_ingest_batch_object do
       has_model
-      with_add_content_datastream
+      with_add_content_file
     end
 
     factory :generic_ingest_batch_object do
@@ -97,14 +97,14 @@ FactoryGirl.define do
       has_model
       has_admin_policy
       has_parent
-      with_add_content_datastream
+      with_add_content_file
 
       factory :generic_ingest_batch_object_with_bytes do
-        with_add_extracted_text_datastream_bytes
+        with_add_extracted_text_file_bytes
       end
 
       factory :generic_ingest_batch_object_with_file do
-        with_add_extracted_text_datastream_file
+        with_add_extracted_text_file_file
       end
 
       factory :generic_ingest_batch_object_with_attributes do
@@ -117,7 +117,7 @@ FactoryGirl.define do
       has_batch
       model "Target"
       is_target_for_collection
-      with_add_content_datastream
+      with_add_content_file
     end
   end
 
@@ -136,10 +136,9 @@ FactoryGirl.define do
       with_clear_desc_metadata_attribute
     end
 
-    factory :basic_clear_all_and_add_batch_object do
+    factory :basic_clear_all_batch_object do
       has_model
       with_clear_all_desc_metadata
-      with_add_desc_metadata_attributes
     end
   end
 

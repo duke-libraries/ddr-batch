@@ -66,51 +66,51 @@ module Ddr::Batch
           before { object.model = "BadModel" }
           it_behaves_like "an invalid ingest object"
         end
-        context "invalid datastreams" do
-          let(:object) { FactoryGirl.create(:ingest_batch_object, :has_model, :with_add_extracted_text_datastream_bytes, :with_add_content_datastream) }
-          context "invalid datastream name" do
-            let(:error_message) { "#{error_prefix} Invalid datastream name for #{object.model}: #{object.batch_object_datastreams.first[:name]}" }
+        context "invalid files" do
+          let(:object) { FactoryGirl.create(:ingest_batch_object, :has_model, :with_add_extracted_text_file_bytes, :with_add_content_file) }
+          context "invalid file name" do
+            let(:error_message) { "#{error_prefix} Invalid file name for #{object.model}: #{object.batch_object_files.first[:name]}" }
             before do
-              datastream = object.batch_object_datastreams.first
-              datastream.name = "invalid_name"
-              datastream.save!
+              file = object.batch_object_files.first
+              file.name = "invalid_name"
+              file.save!
             end
             it_behaves_like "an invalid ingest object"
           end
           context "invalid payload type" do
-            let(:error_message) { "#{error_prefix} Invalid payload type for #{object.batch_object_datastreams.first[:name]} datastream: #{object.batch_object_datastreams.first[:payload_type]}" }
+            let(:error_message) { "#{error_prefix} Invalid payload type for #{object.batch_object_files.first[:name]} file: #{object.batch_object_files.first[:payload_type]}" }
             before do
-              datastream = object.batch_object_datastreams.first
-              datastream.payload_type = "invalid_type"
-              datastream.save!
+              file = object.batch_object_files.first
+              file.payload_type = "invalid_type"
+              file.save!
             end
             it_behaves_like "an invalid ingest object"
           end
           context "missing data file" do
-            let(:error_message) { "#{error_prefix} Missing or unreadable file for #{object.batch_object_datastreams.last[:name]} datastream: #{object.batch_object_datastreams.last[:payload]}" }
+            let(:error_message) { "#{error_prefix} Missing or unreadable file for #{object.batch_object_files.last[:name]} file: #{object.batch_object_files.last[:payload]}" }
             before do
-              datastream = object.batch_object_datastreams.last
-              datastream.payload = "non_existent_file.xml"
-              datastream.save!
+              file = object.batch_object_files.last
+              file.payload = "non_existent_file.xml"
+              file.save!
             end
             it_behaves_like "an invalid ingest object"
           end
           context "checksum without checksum type" do
-            let(:error_message) { "#{error_prefix} Must specify checksum type if providing checksum for #{object.batch_object_datastreams.first.name} datastream" }
+            let(:error_message) { "#{error_prefix} Must specify checksum type if providing checksum for #{object.batch_object_files.first.name} file" }
             before do
-              datastream = object.batch_object_datastreams.first
-              datastream.checksum = "123456"
-              datastream.checksum_type = nil
-              datastream.save!
+              file = object.batch_object_files.first
+              file.checksum = "123456"
+              file.checksum_type = nil
+              file.save!
             end
             it_behaves_like "an invalid ingest object"
           end
           context "invalid checksum type" do
-            let(:error_message) { "#{error_prefix} Invalid checksum type for #{object.batch_object_datastreams.first.name} datastream: #{object.batch_object_datastreams.first.checksum_type}" }
+            let(:error_message) { "#{error_prefix} Invalid checksum type for #{object.batch_object_files.first.name} file: #{object.batch_object_files.first.checksum_type}" }
             before do
-              datastream = object.batch_object_datastreams.first
-              datastream.checksum_type = "SHA-INVALID"
-              datastream.save!
+              file = object.batch_object_files.first
+              file.checksum_type = "SHA-INVALID"
+              file.save!
             end
             it_behaves_like "an invalid ingest object"
           end
@@ -174,7 +174,7 @@ module Ddr::Batch
               let(:attribute) do
                 BatchObjectAttribute.new(
                     operation: BatchObjectAttribute::OPERATION_ADD,
-                    datastream: Ddr::Models::Metadata::DESC_METADATA,
+                    metadata: Ddr::Models::Metadata::DESC_METADATA,
                     name: 'title',
                     value: 'Test Object Title',
                     value_type: Ddr::Batch::BatchObjectAttribute::VALUE_TYPE_STRING
@@ -213,7 +213,7 @@ module Ddr::Batch
 
       context "exception during ingest" do
         let(:object) { FactoryGirl.create(:generic_ingest_batch_object_with_bytes) }
-        before { allow_any_instance_of(IngestBatchObject).to receive(:populate_datastream).and_raise(RuntimeError) }
+        before { allow_any_instance_of(IngestBatchObject).to receive(:populate_file).and_raise(RuntimeError) }
         context "error during processing" do
           it "should log a fatal message and re-raise the exception" do
             expect(Rails.logger).to receive(:fatal).with(/Error in creating repository object/)
@@ -234,9 +234,9 @@ module Ddr::Batch
       context "external checksum verification failure" do
         let(:object) { FactoryGirl.create(:generic_ingest_batch_object_with_bytes) }
         before do
-          object.batch_object_datastreams.each do |ds|
-            if ds.name == "content"
-              ds.checksum = "badabcdef0123456789"
+          object.batch_object_files.each do |f|
+            if f.name == "content"
+              f.checksum = "badabcdef0123456789"
               object.save!
             end
           end
