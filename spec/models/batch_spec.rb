@@ -2,7 +2,7 @@ require 'rails_helper'
 
 module Ddr::Batch
 
-  describe Batch, type: :model, batch: true do
+  RSpec.describe Batch, type: :model, batch: true do
 
     let(:batch) { FactoryGirl.create(:batch_with_basic_ingest_batch_objects) }
 
@@ -38,20 +38,18 @@ module Ddr::Batch
 
     context "validate" do
       let(:parent) { FactoryGirl.create(:test_parent) }
-      let(:pid_cache) { { parent.pid => parent.class.name} }
-      before do
+      let(:pid_cache) { { parent.id => parent.class.name} }
+      it "should cache the results of looking up relationship objects" do
+        expect(batch).to receive(:add_found_pid).once.with(parent.id, "TestParent").and_call_original
         batch.batch_objects.each do |obj|
           obj.batch_object_relationships <<
               BatchObjectRelationship.new(
                   :name => BatchObjectRelationship::RELATIONSHIP_PARENT,
-                  :object => parent.pid,
-                  :object_type => BatchObjectRelationship::OBJECT_TYPE_PID,
+                  :object => parent.id,
+                  :object_type => BatchObjectRelationship::OBJECT_TYPE_REPO_ID,
                   :operation => BatchObjectRelationship::OPERATION_ADD
-                  )
+              )
         end
-      end
-      it "should cache the results of looking up relationship objects" do
-        expect(batch).to receive(:add_found_pid).once.with(parent.pid, "TestParent").and_call_original
         batch.validate
         expect(batch.found_pids).to eq(pid_cache)
       end

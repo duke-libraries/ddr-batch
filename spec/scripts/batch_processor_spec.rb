@@ -2,7 +2,7 @@ require 'rails_helper'
 
 module Ddr::Batch
 
-  shared_examples "a successful ingest batch" do
+  RSpec.shared_examples "a successful ingest batch" do
     let(:log_contents) { File.read(batch.logfile.path) }
     before do
       batch.reload
@@ -14,19 +14,19 @@ module Ddr::Batch
       @repo_objects.each_with_index do |obj, index|
         batch_obj = batch.batch_objects[index]
         expect(obj).to be_an_instance_of(batch_obj.model.constantize)
-        expect(obj.label).to eq(batch_obj.label) if batch_obj.label
+        # expect(obj.label).to eq(batch_obj.label) if batch_obj.label
         batch_obj_ds = batch_obj.batch_object_datastreams
-        batch_obj_ds.each { |d| expect(obj.datastreams[d.name].content).to_not be_nil }
+        batch_obj_ds.each { |d| expect(obj.attached_files[d.name].content).to_not be_nil }
         batch_obj_rs = batch_obj.batch_object_relationships
-        batch_obj_rs.each { |r| expect(obj.send(r.name).pid).to eq(r.object) }
+        batch_obj_rs.each { |r| expect(obj.send(r.name).id).to eq(r.object) }
         obj.events.each do |event|
           expect(event).to be_success unless event.is_a?(Ddr::Events::VirusCheckEvent)
-          expect(event.pid).to eq(obj.pid)
+          expect(event.pid).to eq(obj.id)
           expect(event.event_date_time).to be_within(3.minutes).of(DateTime.now)
           case event.type
           when "Ddr::Events::FixityCheckEvent"
-            expect(event.detail).to include(Ddr::Events::FixityCheckEvent::VALID)
-            expect(event.detail).to_not include(Ddr::Events::FixityCheckEvent::INVALID)
+            expect(event.detail).to include('true')
+            expect(event.detail).to_not include('false')
           when "Ddr::Events::IngestionEvent"
             expect(event.summary).to include("Batch object identifier: #{batch_obj.identifier}")
             expect(event.user_key).to eq(bp_user.user_key)
@@ -48,7 +48,7 @@ module Ddr::Batch
     end
   end
 
-  shared_examples "a successful update batch" do
+  RSpec.shared_examples "a successful update batch" do
     let(:log_contents) { File.read(batch.logfile.path) }
     before do
       batch.reload
@@ -60,8 +60,8 @@ module Ddr::Batch
       @repo_objects.each_with_index do |obj, index|
         batch_obj = batch.batch_objects[index]
         expect(obj).to be_an_instance_of(batch_obj.model.constantize)
-        expect(obj.label).to eq(batch_obj.label) if batch_obj.label
-        expect(obj.title).to eq([ 'Test Object Title' ])
+        # expect(obj.label).to eq(batch_obj.label) if batch_obj.label
+        expect(obj.dc_title).to eq([ 'Test Object Title' ])
         expect(obj.update_events.last.user_key).to eq(bp_user.user_key)
         batch_obj_ds = batch_obj.batch_object_datastreams
         batch_obj_ds.each { |d| expect(obj.datastreams[d.name].content).to_not be_nil }
@@ -80,7 +80,7 @@ module Ddr::Batch
     end
   end
 
-  shared_examples "an interrupted batch run" do
+  RSpec.shared_examples "an interrupted batch run" do
     before { batch.reload }
     it "should have an interrupted status and a failed outcome" do
       expect([Batch::STATUS_INTERRUPTED, Batch::STATUS_RESTARTABLE]).to include(batch.status)
@@ -91,7 +91,7 @@ module Ddr::Batch
     end
   end
 
-  shared_examples "an invalid batch" do
+  RSpec.shared_examples "an invalid batch" do
     before { batch.reload }
     it "should have an invalid status and a failed outcome" do
       expect(batch.status).to eq(Batch::STATUS_INVALID)
@@ -102,7 +102,7 @@ module Ddr::Batch
     end
   end
 
-  describe BatchProcessor do
+  RSpec.describe BatchProcessor do
     let(:test_dir) { Dir.mktmpdir("dul_hydra_test") }
     let(:log_dir) { test_dir }
     let(:bp_user) { FactoryGirl.create(:user) }
@@ -138,14 +138,14 @@ module Ddr::Batch
     context "update" do
       let(:batch) { FactoryGirl.create(:batch_with_basic_update_batch_object) }
       let(:repo_object) do
-        r_obj = TestModelOmnibus.new(:pid => batch.batch_objects.first.pid, :label => 'Object Label')
-        r_obj.add_file("#{Rails.root}/spec/fixtures/imageA.tif", Ddr::Datastreams::CONTENT)
+        r_obj = TestModelOmnibus.new(:id => batch.batch_objects.first.pid)
+        r_obj.add_file("#{Rails.root}/spec/fixtures/imageA.tif", path: Ddr::Models::File::CONTENT)
         r_obj.save
         r_obj
       end
       let(:bp) { BatchProcessor.new(batch, bp_user, log_dir: log_dir) }
       before do
-        repo_object.roles.grant({ type: 'MetadataEditor', agent: batch.user.user_key, scope: 'resource' })
+        repo_object.roles.grant({ role_type: 'MetadataEditor', agent: batch.user.user_key, scope: 'resource' })
         repo_object.save
       end
       context "successful update" do

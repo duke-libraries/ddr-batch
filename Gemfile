@@ -14,3 +14,5 @@ gem "devise"
 
 # To use debugger
 # gem 'debugger'
+
+gem 'ddr-models', '3.0.0'

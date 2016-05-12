@@ -2,25 +2,25 @@ require 'rails_helper'
 
 module Ddr::Batch
 
-  shared_examples "a valid update object" do
+  RSpec.shared_examples "a valid update object" do
     it "should be valid" do
       expect(object.validate).to be_empty
     end
   end
 
-  shared_examples "an invalid update object" do
+  RSpec.shared_examples "an invalid update object" do
     it "should not be valid" do
       expect(object.validate).to include(error_message)
     end
   end
 
-  shared_examples "a loggable event has occurred" do
+  RSpec.shared_examples "a loggable event has occurred" do
     it "should log the event" do
       expect(repo_object.update_events.last.comment).to eq("Updated by batch process (Batch #{object.batch.id}, BatchObject #{object.id})")
     end
   end
 
-  describe UpdateBatchObject, type: :model, batch: true do
+  RSpec.describe UpdateBatchObject, type: :model, batch: true do
 
     let(:object) { batch.batch_objects.first }
 
@@ -29,10 +29,10 @@ module Ddr::Batch
     context "validate", validation: true do
       let(:batch) { FactoryGirl.create(:batch_with_basic_update_batch_object) }
       context "valid object" do
-        let(:repo_object) { TestModel.new(:pid => object.pid) }
+        let(:repo_object) { TestModel.new(:id => object.pid) }
         before do
-          repo_object.roles.grant({ type: 'MetadataEditor', agent: batch.user.user_key, scope: 'resource' })
-          repo_object.save
+          repo_object.roles.grant({ role_type: 'MetadataEditor', agent: batch.user.user_key, scope: 'resource' })
+          repo_object.save!
         end
         context "generic object" do
           it_behaves_like "a valid update object"
@@ -57,7 +57,7 @@ module Ddr::Batch
           it_behaves_like "an invalid update object"
         end
         context "batch user not permitted to edit repository object" do
-          let!(:repo_object) { TestModel.create(:pid => object.pid) }
+          let!(:repo_object) { TestModel.create(:id => object.pid) }
           let(:error_message) { "#{error_prefix} #{batch.user.user_key} not permitted to edit #{object.pid}" }
           it_behaves_like "an invalid update object"
         end
@@ -65,9 +65,10 @@ module Ddr::Batch
     end
 
     context "update" do
-      let(:repo_object) { TestModel.create(pid: object.pid, title: [ "Test Model Title" ], identifier: [ "id1", "id2" ]) }
+      let(:repo_object) { TestModel.create(id: object.pid, dc_title: [ "Test Model Title" ], dc_identifier: [ "id1", "id2" ]) }
       before do
-        batch.user.can :edit, repo_object
+        repo_object.roles.grant({ role_type: 'MetadataEditor', agent: batch.user.user_key, scope: 'resource' })
+        repo_object.save!
         object.process(batch.user)
         repo_object.reload
       end
@@ -76,14 +77,14 @@ module Ddr::Batch
           let(:batch) { FactoryGirl.create(:batch_with_basic_update_batch_object) }
           it_behaves_like "a loggable event has occurred"
           it "should add the attribute value to the repository object" do
-            expect(repo_object.title).to eq( [ 'Test Model Title', 'Test Object Title' ] )
+            expect(repo_object.dc_title).to eq( [ 'Test Model Title', 'Test Object Title' ] )
           end
         end
         context "clear" do
           let(:batch) { FactoryGirl.create(:batch_with_basic_clear_attribute_batch_object) }
           it_behaves_like "a loggable event has occurred"
           it "should clear the attribute in the repository object" do
-            expect(repo_object.title).to be_empty
+            expect(repo_object.dc_title).to be_empty
           end
         end
         # Can't really test just clearing all attributes because can't save datastream with no content
@@ -91,8 +92,8 @@ module Ddr::Batch
           let(:batch) { FactoryGirl.create(:batch_with_basic_clear_all_and_add_batch_object) }
           it_behaves_like "a loggable event has occurred"
           it "should clear the existing attributes from the repository object and add an attribute value" do
-            expect(repo_object.title).to eq( [ 'Test Object Title' ] )
-            expect(repo_object.identifier).to be_empty
+            expect(repo_object.dc_title).to eq( [ 'Test Object Title' ] )
+            expect(repo_object.dc_identifier).to be_empty
           end
         end
       end

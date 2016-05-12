@@ -4,13 +4,12 @@ module Ddr::Batch
 
     def local_validations
       errors = []
-      errors << "#{@error_prefix} Model required for INGEST operation" unless model
-      errors += validate_pre_assigned_pid if pid
+      errors << "#{error_prefix} Model required for INGEST operation" unless model
       errors
     end
 
     def model_datastream_keys
-      model.constantize.new.datastreams.keys
+      model.constantize.new.attached_files.keys
     end
 
     def process(user, opts = {})
@@ -28,17 +27,11 @@ module Ddr::Batch
 
     private
 
-    def validate_pre_assigned_pid
-      errs = []
-      errs << "#{@error_prefix} #{pid} already exists in repository" if ActiveFedora::Base.exists?(pid)
-      return errs
-    end
-
     def ingest(user, opts = {})
       repo_object = create_repository_object
       if !repo_object.nil? && !repo_object.new_record?
         ingest_outcome_detail = []
-        ingest_outcome_detail << "Ingested #{model} #{identifier} into #{repo_object.pid}"
+        ingest_outcome_detail << "Ingested #{model} #{identifier} into #{repo_object.id}"
         Ddr::Events::IngestionEvent.new.tap do |event|
           event.object = repo_object
           event.user = user
@@ -51,7 +44,6 @@ module Ddr::Batch
           event.detail = ingest_outcome_detail.join("\n")
           event.save!
         end
-        update_attributes(:pid => repo_object.pid)
         verifications = verify_repository_object
         verification_outcome_detail = []
         verified = true
@@ -82,25 +74,26 @@ module Ddr::Batch
       repo_pid = pid if pid.present?
       repo_object = nil
       begin
-        repo_object = model.constantize.new(:pid => repo_pid)
-        repo_object.label = label if label
+        repo_object = model.constantize.new(:id => repo_pid)
         repo_object.save(validate: false)
+        update_attributes(:pid => repo_object.id)
         batch_object_attributes.each { |a| repo_object = add_attribute(repo_object, a) }
         batch_object_datastreams.each { |d| repo_object = populate_datastream(repo_object, d) }
         batch_object_relationships.each { |r| repo_object = add_relationship(repo_object, r) }
         repo_object.save
       rescue Exception => e1
-        logger.fatal("Error in creating repository object #{repo_object.pid} for #{identifier} : #{e1}")
+        logger.fatal("Error in creating repository object #{repo_object.id} for #{identifier} : #{e1}")
         repo_clean = false
         if repo_object && !repo_object.new_record?
           begin
-            logger.info("Deleting potentially incomplete #{repo_object.pid} due to error in ingest batch processing")
+            logger.info("Deleting potentially incomplete #{repo_object.id} due to error in ingest batch processing")
             repo_object.destroy
           rescue Exception => e2
-            logger.fatal("Error deleting repository object #{repo_object.pid}: #{e2}")
+            logger.fatal("Error deleting repository object #{repo_object.id}: #{e2}")
           else
             repo_clean = true
           end
+          update_attributes(pid: nil)
         else
           repo_clean = true
         end

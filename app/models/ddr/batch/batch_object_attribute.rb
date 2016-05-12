@@ -16,6 +16,7 @@ module Ddr::Batch
 
     validates :operation, inclusion: { in: OPERATIONS }
     validates :datastream, presence: true
+    validate :valid_datastream_operation
     with_options if: :operation_requires_name? do |obj|
       obj.validates :name, presence: true
     end
@@ -23,6 +24,14 @@ module Ddr::Batch
     with_options if: :operation_requires_value? do |obj|
       obj.validates :value, presence: true
       obj.validates :value_type, inclusion: { in: VALUE_TYPES }
+    end
+
+    def valid_datastream_operation
+      if operation == OPERATION_CLEAR_ALL
+        unless datastream == Ddr::Models::Metadata::DESC_METADATA
+          errors.add(:operation, "Operation #{operation} is not valid for #{datastream}")
+        end
+      end
     end
 
     def operation_requires_name?
@@ -46,11 +55,16 @@ module Ddr::Batch
     end
 
     def datastream_valid?
-        datastream_type < ActiveFedora::RDFDatastream rescue false
+        [ Ddr::Models::Metadata::ADMIN_METADATA, Ddr::Models::Metadata::DESC_METADATA ].include?(datastream)
     end
 
     def attribute_name_valid?
-      datastream_type.term_names.include?(name.to_sym)
+      case datastream
+        when Ddr::Models::Metadata::ADMIN_METADATA
+          batch_object.model.constantize.properties.include?(name)
+        when Ddr::Models::Metadata::DESC_METADATA
+          Ddr::Models::DescriptiveMetadata.unqualified_names.include?(name.to_sym)
+      end
     end
 
   end
