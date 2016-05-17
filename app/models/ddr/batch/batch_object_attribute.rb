@@ -50,10 +50,6 @@ module Ddr::Batch
       end
     end
 
-    def datastream_type
-      batch_object.model.constantize.ds_specs[datastream][:type] rescue nil
-    end
-
     def datastream_valid?
         [ Ddr::Models::Metadata::ADMIN_METADATA, Ddr::Models::Metadata::DESC_METADATA ].include?(datastream)
     end
