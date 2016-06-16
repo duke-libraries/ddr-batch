@@ -6,7 +6,7 @@ module Ddr::Batch
     OPERATION_ADD = "ADD"              # Add the provided value to the attribute
     OPERATION_DELETE = "DELETE"        # Delete the provided value from the attribute
     OPERATION_CLEAR = "CLEAR"          # Clear all values from the attribute
-    OPERATION_CLEAR_ALL = "CLEAR_ALL"  # Clear all attributes in the datastream
+    OPERATION_CLEAR_ALL = "CLEAR_ALL"  # Clear all attributes for a particular type of metadata
 
     OPERATIONS = [ OPERATION_ADD, OPERATION_DELETE, OPERATION_CLEAR, OPERATION_CLEAR_ALL ]
 
@@ -15,21 +15,21 @@ module Ddr::Batch
     VALUE_TYPES = [ VALUE_TYPE_STRING ]
 
     validates :operation, inclusion: { in: OPERATIONS }
-    validates :datastream, presence: true
-    validate :valid_datastream_operation
+    validates :metadata, presence: true
+    validate :valid_metadata_operation
     with_options if: :operation_requires_name? do |obj|
       obj.validates :name, presence: true
     end
-    validate :valid_datastream_and_attribute_name, if: [ 'batch_object.model', 'datastream', 'name' ]
+    validate :valid_metadata_and_attribute_name, if: [ 'batch_object.model', 'metadata', 'name' ]
     with_options if: :operation_requires_value? do |obj|
       obj.validates :value, presence: true
       obj.validates :value_type, inclusion: { in: VALUE_TYPES }
     end
 
-    def valid_datastream_operation
+    def valid_metadata_operation
       if operation == OPERATION_CLEAR_ALL
-        unless datastream == Ddr::Models::Metadata::DESC_METADATA
-          errors.add(:operation, "Operation #{operation} is not valid for #{datastream}")
+        unless metadata == Ddr::Models::Metadata::DESC_METADATA
+          errors.add(:operation, "Operation #{operation} is not valid for #{metadata}")
         end
       end
     end
@@ -42,20 +42,20 @@ module Ddr::Batch
       [ OPERATION_ADD, OPERATION_DELETE ].include? operation
     end
 
-    def valid_datastream_and_attribute_name
-      if datastream_valid?
+    def valid_metadata_and_attribute_name
+      if metadata_valid?
         errors.add(:name, "is not valid") unless attribute_name_valid?
       else
-        errors.add(:datastream, "is not valid")
+        errors.add(:metadata, "is not valid")
       end
     end
 
-    def datastream_valid?
-        [ Ddr::Models::Metadata::ADMIN_METADATA, Ddr::Models::Metadata::DESC_METADATA ].include?(datastream)
+    def metadata_valid?
+        [ Ddr::Models::Metadata::ADMIN_METADATA, Ddr::Models::Metadata::DESC_METADATA ].include?(metadata)
     end
 
     def attribute_name_valid?
-      case datastream
+      case metadata
         when Ddr::Models::Metadata::ADMIN_METADATA
           batch_object.model.constantize.properties.include?(name)
         when Ddr::Models::Metadata::DESC_METADATA
