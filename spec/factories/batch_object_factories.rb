@@ -77,6 +77,12 @@ FactoryGirl.define do
     end
   end
 
+  trait :with_add_resource_role do
+    after(:create) do |batch_object|
+      FactoryGirl.create(:batch_object_add_resource_role, batch_object: batch_object)
+    end
+  end
+
   factory :ingest_batch_object, :class => Ddr::Batch::IngestBatchObject do
     has_identifier
     has_label
@@ -102,6 +108,10 @@ FactoryGirl.define do
 
       factory :generic_ingest_batch_object_with_attributes do
         with_add_desc_metadata_attributes
+      end
+
+      factory :generic_ingest_batch_object_with_roles do
+        with_add_resource_role
       end
     end
 
