@@ -52,6 +52,11 @@ module Ddr::Batch
           let(:object) { FactoryGirl.create(:generic_ingest_batch_object_with_bytes, :has_batch) }
           it_behaves_like "a valid ingest object"
         end
+        context "collection object" do
+          let(:object) { FactoryGirl.create(:collection_ingest_batch_object, :has_batch) }
+          before { object.model = 'Collection' }
+          it_behaves_like "a valid ingest object"
+        end
         context "target object" do
           let(:object) { FactoryGirl.create(:target_ingest_batch_object, :has_batch) }
           it_behaves_like "a valid ingest object"
@@ -92,6 +97,12 @@ module Ddr::Batch
           let(:object) { FactoryGirl.create(:ingest_batch_object) }
           let(:error_message) { "#{error_prefix} Invalid model name: #{object.model}" }
           before { object.model = "BadModel" }
+          it_behaves_like "an invalid ingest object"
+        end
+        context "collection missing title" do
+          let(:object) { FactoryGirl.create(:ingest_batch_object) }
+          let(:error_message) { "#{error_prefix} Collection title can't be blank" }
+          before { object.model = "Collection" }
           it_behaves_like "an invalid ingest object"
         end
         context "pre-assigned pid already exists" do
