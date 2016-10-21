@@ -24,7 +24,7 @@ module Ddr::Batch
 
     let(:object) { batch.batch_objects.first }
 
-    before { allow(File).to receive(:readable?).with("/tmp/qdc-rdf.nt").and_return(true) }
+    # before { allow(File).to receive(:readable?).with("/tmp/qdc-rdf.nt").and_return(true) }
 
     context "validate", validation: true do
       let(:batch) { FactoryGirl.create(:batch_with_basic_update_batch_object) }

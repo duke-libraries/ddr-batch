@@ -6,6 +6,7 @@ module Ddr::Batch
       errors = []
       errors << "#{@error_prefix} Model required for INGEST operation" unless model
       errors += validate_pre_assigned_pid if pid
+      errors += validate_collection if model == 'Collection'
       errors
     end
 
@@ -32,6 +33,16 @@ module Ddr::Batch
       errs = []
       errs << "#{@error_prefix} #{pid} already exists in repository" if ActiveFedora::Base.exists?(pid)
       return errs
+    end
+
+    def validate_collection
+      errs = []
+      coll = Collection.new
+      batch_object_attributes.each { |attr| coll = add_attribute(coll, attr) }
+      unless coll.valid?
+        coll.errors.messages.each { |k, v| errs << "#{@error_prefix} Collection #{k} #{v.join(';')}" }
+      end
+      errs
     end
 
     def ingest(user, opts = {})
@@ -88,7 +99,8 @@ module Ddr::Batch
         batch_object_attributes.each { |a| repo_object = add_attribute(repo_object, a) }
         batch_object_datastreams.each { |d| repo_object = populate_datastream(repo_object, d) }
         batch_object_relationships.each { |r| repo_object = add_relationship(repo_object, r) }
-        repo_object.save
+        batch_object_roles.each { |r| repo_object = add_role(repo_object, r) }
+        repo_object.save! # Do not allow batch ingest to successfully create an invalid object
       rescue Exception => e1
         logger.fatal("Error in creating repository object #{repo_object.pid} for #{identifier} : #{e1}")
         repo_clean = false

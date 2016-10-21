@@ -21,9 +21,19 @@ module Ddr::Batch
     it "should result in a verified repository object" do
       expect(object.verified).to be_truthy
       expect(object.pid).to eq(assigned_pid) if assigned_pid.present?
-      expect(repo_object.title).to eq(["Test Object Title"])
+      if desc_metadata_provided
+        expect(repo_object.title).to eq(["Test Object Title"])
+      end
+      unless object.batch_object_roles.empty?
+        expect(repo_object.roles.first.role_type).to eq([Ddr::Auth::Roles::RoleTypes::EDITOR.title])
+        expect(repo_object.roles.first.agent).to eq(["user@test.com"])
+        expect(repo_object.roles.first.scope).to eq([Ddr::Auth::Roles::RESOURCE_SCOPE])
+      end
       unless object.batch_object_attributes.empty?
         expect(verification_event.detail).to include("title attribute set correctly...#{BatchObject::VERIFICATION_PASS}")
+      end
+      unless object.batch_object_roles.empty?
+        expect(verification_event.detail).to include("resource Editor user@test.com role is correct...#{BatchObject::VERIFICATION_PASS}")
       end
     end
   end
@@ -40,6 +50,11 @@ module Ddr::Batch
       context "valid object" do
         context "generic object" do
           let(:object) { FactoryGirl.create(:generic_ingest_batch_object_with_bytes, :has_batch) }
+          it_behaves_like "a valid ingest object"
+        end
+        context "collection object" do
+          let(:object) { FactoryGirl.create(:collection_ingest_batch_object, :has_batch) }
+          before { object.model = 'Collection' }
           it_behaves_like "a valid ingest object"
         end
         context "target object" do
@@ -82,6 +97,12 @@ module Ddr::Batch
           let(:object) { FactoryGirl.create(:ingest_batch_object) }
           let(:error_message) { "#{error_prefix} Invalid model name: #{object.model}" }
           before { object.model = "BadModel" }
+          it_behaves_like "an invalid ingest object"
+        end
+        context "collection missing title" do
+          let(:object) { FactoryGirl.create(:ingest_batch_object) }
+          let(:error_message) { "#{error_prefix} Collection title can't be blank" }
+          before { object.model = "Collection" }
           it_behaves_like "an invalid ingest object"
         end
         context "pre-assigned pid already exists" do
@@ -222,20 +243,29 @@ module Ddr::Batch
           let(:assigned_pid) { nil }
           context "payload type bytes" do
             let(:object) { FactoryGirl.create(:generic_ingest_batch_object_with_bytes) }
+            let(:desc_metadata_provided) { true }
             it_behaves_like "a successful ingest"
           end
           context "payload type file" do
             let(:object) { FactoryGirl.create(:generic_ingest_batch_object_with_file) }
+            let(:desc_metadata_provided) { true }
             before { allow(File).to receive(:read).with('/tmp/qdc-rdf.nt').and_return('_:test <http://purl.org/dc/terms/title> "Test Object Title" .') }
             it_behaves_like "a successful ingest"
           end
           context "attributes" do
             let(:object) { FactoryGirl.create(:generic_ingest_batch_object_with_attributes) }
+            let(:desc_metadata_provided) { true }
+            it_behaves_like "a successful ingest"
+          end
+          context "roles" do
+            let(:object) { FactoryGirl.create(:generic_ingest_batch_object_with_roles) }
+            let(:desc_metadata_provided) { false }
             it_behaves_like "a successful ingest"
           end
         end
         context "object with a pre-assigned PID" do
           let(:object) { FactoryGirl.create(:generic_ingest_batch_object_with_bytes) }
+          let(:desc_metadata_provided) { true }
           let(:assigned_pid) { 'test:6543' }
           before do
             object.pid = assigned_pid
@@ -245,6 +275,7 @@ module Ddr::Batch
         end
         context "previously ingested object (e.g., during restart)" do
           let(:object) { FactoryGirl.create(:generic_ingest_batch_object_with_bytes) }
+          let(:desc_metadata_provided) { true }
           let(:assigned_pid) { 'test:6543' }
           before do
             object.pid = assigned_pid

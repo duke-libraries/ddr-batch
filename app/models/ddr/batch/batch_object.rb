@@ -8,6 +8,7 @@ module Ddr::Batch
       has_many :batch_object_attributes, -> { order "id ASC" }, inverse_of: :batch_object, dependent: :destroy
       has_many :batch_object_datastreams, inverse_of: :batch_object, dependent: :destroy
       has_many :batch_object_relationships, inverse_of: :batch_object, dependent: :destroy
+      has_many :batch_object_roles, inverse_of: :batch_object, dependent: :destroy
 
       VERIFICATION_PASS = "PASS"
       VERIFICATION_FAIL = "FAIL"
@@ -172,6 +173,11 @@ module Ddr::Batch
               verifications["#{r.name} relationship is correct"] = verify_relationship(repo_object, r)
             end
           end
+          unless batch_object_roles.empty?
+            batch_object_roles.each do |r|
+              verifications["#{r.role_scope} #{r.role_type} #{r.agent} role is correct"] = verify_role(repo_object, r)
+            end
+          end
           result = Ddr::Actions::FixityCheck.execute repo_object
           verifications["Fixity check"] = result.success ? VERIFICATION_PASS : VERIFICATION_FAIL
         end
@@ -228,6 +234,11 @@ module Ddr::Batch
         end
       end
 
+      def verify_role(repo_object, role)
+        role_hash = {  "role_type"=>[ role.role_type ], "agent"=>[ role.agent ], "scope"=>[ role.role_scope ] }
+        repo_object.roles.role_set.map(&:to_h).include?(role_hash) ? VERIFICATION_PASS : VERIFICATION_FAIL
+      end
+
       def add_attribute(repo_object, attribute)
         repo_object.datastreams[attribute.datastream].add_value(attribute.name, attribute.value)
         return repo_object
@@ -242,6 +253,11 @@ module Ddr::Batch
         repo_object.datastreams[attribute.datastream].class.term_names.each do |term|
           repo_object.datastreams[attribute.datastream].set_values(term, nil) if repo_object.datastreams[attribute.datastream].values(term)
         end
+        return repo_object
+      end
+
+      def add_role(repo_object, role)
+        repo_object.roles.grant(scope: role.role_scope, type: role.role_type, agent: role.agent)
         return repo_object
       end
 
