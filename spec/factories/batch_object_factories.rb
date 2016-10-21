@@ -115,6 +115,11 @@ FactoryGirl.define do
       end
     end
 
+    factory :collection_ingest_batch_object do
+      model "Collection"
+      with_add_desc_metadata_attributes
+    end
+
     factory :target_ingest_batch_object do
       model "Target"
       is_target_for_collection
