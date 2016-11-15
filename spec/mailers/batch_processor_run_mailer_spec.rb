@@ -6,7 +6,8 @@ module Ddr::Batch
     let(:user) { FactoryGirl.create(:user) }
     let(:batch) { Ddr::Batch::Batch.new(id: 54,
                                         user_id: user.id,
-                                        status: Batch::OUTCOME_SUCCESS,
+                                        status: Batch::STATUS_FINISHED,
+                                        outcome: Batch::OUTCOME_SUCCESS,
                                         logfile_file_name: 'test.txt'
                                        )
                 }
@@ -30,7 +31,7 @@ module Ddr::Batch
       expect(ActionMailer::Base.deliveries).not_to be_empty
       email = ActionMailer::Base.deliveries.first
       expect(email.to).to eq([user.email])
-      expect(email.subject).to include("Batch Processor Run #{batch.status}")
+      expect(email.subject).to include("Batch Processor Run #{batch.status} #{batch.outcome}")
       expect(email.parts.first.to_s).to include("Ingested TestModel")
       expect(email.parts.second.to_s).to include("Objects in batch: #{batch.batch_objects.count}")
       expect(email.parts.second.to_s).to include(Batch::OUTCOME_SUCCESS)

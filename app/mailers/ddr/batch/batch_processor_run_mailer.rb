@@ -6,7 +6,7 @@ module Ddr::Batch
 
     def send_notification(batch)
       @batch = batch
-      @title = "Batch Processor Run #{@batch.status}"
+      @title = "Batch Processor Run #{@batch.status} #{@batch.outcome}"
       @host = `uname -n`.strip
       @subject = "[#{@host}] #{@title}"
       from = "#{`echo $USER`.strip}@#{@host}"
