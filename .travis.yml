@@ -1,7 +1,9 @@
 language: ruby
 rvm:
-    - 2.1
-script: "bundle exec rake ci"
+- 2.1
+script: bundle exec rake ci
 notifications:
-    email:
-        - lib-drs@duke.edu
+  email:
+  - lib-drs@duke.edu
+  slack:
+    secure: D2Yz/XwCBCZaQAhuGQ/smQZ7GJLLbRkCT5Au1IVVGpGk+ccNfqgWL7ZQHh/031nCRvBcc7TVHh5bOeXAubVu4A+pk7edPm3duaUgEy2+dxWuGwHrzrXO1ipXL6yAMyr1CJWz4urEqKavB8HCtG4q+/lNlZw5gFIyBdCIBH2s7EQ2CbDNqs9uDO5tXosG0U9BA30f6lC9X5c0i04QBUOBheSoRl0x8x/MzuvahqQ++a4Xgrj3KLhx2qFdOedOGaMKqKh2rihuPC6TgooNHNTns71MbIwiUXZMPj6eQKP+K+Y/i75rWoEeRxKJ6qoHWBBk9hC1R5vhVMwunhoADrgN43WhxWxwYsxuUjhPw0Z9vmJhEctJco9wNAVxFp9LGAB0voFJbgyvBVTOKfr53UsUL4OXycO8kTwV13vDVKVmsQ9wNpdkI3Aw9B+Ac/kczdRT8gBYQu44C/ZqdqMfXd7tKriNYV27y1ZF1l53KT1UyLx101PILL4JZyYrKQYdu27CwWNntXYvT9NWJRFt1nuwv5e9oLvq1rnO30+ckY/mPcgj/1SYDdDTcXgUnHe/ZtQLvmW57q4EVu2B+qWHxqENTQlZ2jBKbmHbRwl9GNrJIWn2kaC9cfrnevprOloxNcj0rnTU8r+3xhFP7UzbiRcP3AXShCBRkzWShEFtMiL3YY4=

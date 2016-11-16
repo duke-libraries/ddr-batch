@@ -9,6 +9,12 @@ module Ddr
     extend ActiveSupport::Autoload
 
     autoload :BatchUser
+    autoload :BatchObjectProcessingError, 'ddr/batch/error'
+
+    # Logging level for batch processing - defaults to Logger::INFO
+    mattr_accessor :processor_logging_level do
+      Logger::INFO
+    end
 
     def self.table_name_prefix
     end
