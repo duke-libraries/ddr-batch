@@ -20,10 +20,11 @@ module Ddr::Batch
 
     def results_message
       if pid
-        verification_result = (verified ? "Verified" : "VERIFICATION FAILURE")
-        message = "Ingested #{model} #{identifier} into #{pid}...#{verification_result}"
+        message_level = verified ? Logger::INFO : Logger::WARN
+        verification_result = verified ? "Verified" : "VERIFICATION FAILURE"
+        ProcessingResultsMessage.new(message_level, "Ingested #{model} #{identifier} into #{pid}...#{verification_result}")
       else
-        message = "Attempt to ingest #{model} #{identifier} FAILED"
+        ProcessingResultsMessagemessage.new(Logger::ERROR, "Attempt to ingest #{model} #{identifier} FAILED")
       end
     end
 
@@ -103,22 +104,13 @@ module Ddr::Batch
         repo_object.save! # Do not allow batch ingest to successfully create an invalid object
       rescue Exception => e1
         logger.fatal("Error in creating repository object #{repo_object.pid} for #{identifier} : #{e1}")
-        repo_clean = false
         if repo_object && !repo_object.new_record?
           begin
             logger.info("Deleting potentially incomplete #{repo_object.pid} due to error in ingest batch processing")
             repo_object.destroy
           rescue Exception => e2
             logger.fatal("Error deleting repository object #{repo_object.pid}: #{e2}")
-          else
-            repo_clean = true
           end
-        else
-          repo_clean = true
-        end
-        if batch.present?
-          batch.status = repo_clean ? Batch::STATUS_RESTARTABLE : Batch::STATUS_INTERRUPTED
-          batch.save
         end
         raise e1
       end

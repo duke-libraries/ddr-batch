@@ -2,7 +2,7 @@ en:
     ddr:
         batch:
             errors:
-                prefix: "%{identifier} [Database ID: %{id}]:"
+                prefix: "%{identifier}:"
             no_batches: "No %{type} batches found for your user account."
             web:
                 action_names:

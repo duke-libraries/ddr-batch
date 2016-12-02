@@ -22,29 +22,15 @@ module Ddr::Batch
     STATUS_QUEUED_FOR_DELETION = "QUEUED FOR DELETION"
     STATUS_DELETING = "DELETING"
 
-    def validate
-      errors = []
-      begin
-        batch_objects.each do |object|
-          unless object.verified
-            errors << object.validate
-          end
-        end
-      rescue Exception => e
-        errors << "Exception raised during batch validation: #{e.backtrace}"
-      end
-      errors.flatten
-    end
-
-    def completed_count
-      batch_objects.where(verified: true).count
+    def handled_count
+      batch_objects.where(handled: true).count
     end
 
     def time_to_complete
-      unless processing_step_start.nil?
-        if completed_count > 0
-          completed = completed_count
-          ((Time.now - processing_step_start.to_time) / completed) * (batch_objects.count - completed)
+      unless start.nil?
+        if handled_count > 0
+          handled = handled_count
+          ((Time.now - start.to_time) / handled) * (batch_objects.count - handled)
         end
       end
     end
@@ -63,6 +49,10 @@ module Ddr::Batch
 
     def collect_pre_assigned_pids
       batch_objects.map{ |x| x.pid if x.pid.present? }.compact
+    end
+
+    def unhandled_objects?
+      batch_objects.any? { |batch_object| !batch_object.handled? }
     end
 
     def finished?

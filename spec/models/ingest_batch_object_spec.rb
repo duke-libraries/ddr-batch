@@ -87,7 +87,7 @@ module Ddr::Batch
       end
 
       context "invalid object" do
-        let(:error_prefix) { "#{object.identifier} [Database ID: #{object.id}]:"}
+        let(:error_prefix) { "#{object.identifier}:"}
         context "missing model" do
           let(:object) { FactoryGirl.create(:ingest_batch_object) }
           let(:error_message) { "#{error_prefix} Model required for INGEST operation" }

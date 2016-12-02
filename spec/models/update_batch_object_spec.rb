@@ -43,7 +43,7 @@ module Ddr::Batch
         end
       end
       context "invalid object" do
-        let(:error_prefix) { "#{object.identifier} [Database ID: #{object.id}]:"}
+        let(:error_prefix) { "#{object.identifier}:"}
         context "missing pid" do
           let(:error_message) { "#{error_prefix} PID required for UPDATE operation" }
           before do
