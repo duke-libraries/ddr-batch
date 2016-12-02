@@ -96,12 +96,12 @@ module Ddr::Batch
       begin
         repo_object = model.constantize.new(:pid => repo_pid)
         repo_object.label = label if label
-        repo_object.save(validate: false)
         batch_object_attributes.each { |a| repo_object = add_attribute(repo_object, a) }
+        repo_object.save(validate: false)
         batch_object_datastreams.each { |d| repo_object = populate_datastream(repo_object, d) }
         batch_object_relationships.each { |r| repo_object = add_relationship(repo_object, r) }
         batch_object_roles.each { |r| repo_object = add_role(repo_object, r) }
-        repo_object.save! # Do not allow batch ingest to successfully create an invalid object
+        repo_object.save!
       rescue Exception => e1
         logger.fatal("Error in creating repository object #{repo_object.pid} for #{identifier} : #{e1}")
         if repo_object && !repo_object.new_record?
