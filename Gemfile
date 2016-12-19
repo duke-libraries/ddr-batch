@@ -12,5 +12,9 @@ gem "devise"
 # Git. Remember to move these dependencies to your gemspec before releasing
 # your gem to rubygems.org.
 
+# Temporarily pin ddr-models to 2.6.0.rc1.
+# Remove this line and update the gemspec when ddr-models 2.6.0 is released.
+gem "ddr-models", "2.6.0.rc1"
+
 # To use debugger
 # gem 'debugger'
