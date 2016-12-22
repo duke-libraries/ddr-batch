@@ -60,7 +60,7 @@ module Ddr::Batch
       end
 
       def update_batch(batch)
-        outcome = batch.success.eql?(batch.batch_objects.size) ? Batch::OUTCOME_SUCCESS : Batch::OUTCOME_FAILURE
+        outcome = batch.success_count.eql?(batch.batch_objects.size) ? Batch::OUTCOME_SUCCESS : Batch::OUTCOME_FAILURE
         logfile = File.new(Ddr::Batch::Log.file_path(batch.id))
         batch.update!(stop: DateTime.now,
                       status: Batch::STATUS_FINISHED,
