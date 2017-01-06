@@ -14,7 +14,7 @@ gem "devise"
 
 # Temporarily pin ddr-models to 2.6.0.rc1.
 # Remove this line and update the gemspec when ddr-models 2.6.0 is released.
-gem "ddr-models", "2.6.0.rc1"
+gem "ddr-models", github: 'duke-libraries/ddr-models', ref: 'e0ed623a3722ca9583f2531f97dd5f20c126293d'
 
 # To use debugger
 # gem 'debugger'
