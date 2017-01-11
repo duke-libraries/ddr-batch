@@ -70,9 +70,11 @@ module Ddr::Batch
 
       def send_notification(batch)
         begin
-          BatchProcessorRunMailer.send_notification(batch).deliver!
-        rescue
+          Ddr::Batch::BatchProcessorRunMailer.send_notification(batch).deliver!
+        rescue => e
           Rails.logger.error("An error occurred while attempting to send a notification for batch #{batch.id}")
+          Rails.logger.error(e.message)
+          Rails.logger.error(e.backtrace)
         end
       end
     end
