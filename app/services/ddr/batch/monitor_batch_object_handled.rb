@@ -13,6 +13,7 @@ module Ddr::Batch
 
       def batch_object_handled(batch_object, batch)
         log_batch_object_messages(batch_object, batch.id)
+        batch_object.update!(handled: true)
         unless batch.unhandled_objects?
           ActiveSupport::Notifications.instrument('finished.batch.batch.ddr', batch_id: batch.id)
         end
