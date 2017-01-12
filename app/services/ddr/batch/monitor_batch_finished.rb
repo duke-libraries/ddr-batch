@@ -52,9 +52,9 @@ module Ddr::Batch
 
       def type_verb(type)
         case type
-          when IngestBatchObject.name
+          when Ddr::Batch::IngestBatchObject.name
             "Ingested"
-          when UpdateBatchObject.name
+          when Ddr::Batch::UpdateBatchObject.name
             "Updated"
         end
       end
