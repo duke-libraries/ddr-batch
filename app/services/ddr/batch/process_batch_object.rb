@@ -12,8 +12,6 @@ module Ddr::Batch
       ActiveSupport::Notifications.instrument("handled.batchobject.batch.ddr",
                                               batch_object_id: batch_object_id) do |payload|
         batch_object = BatchObject.find(batch_object_id)
-        # Mark batch object as 'handled'
-        batch_object.update!(handled: true)
         # Validate batch object
         errors = batch_object.validate
         # Process batch object or record validation errors

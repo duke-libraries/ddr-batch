@@ -52,15 +52,15 @@ module Ddr::Batch
 
       def type_verb(type)
         case type
-          when IngestBatchObject.name
+          when Ddr::Batch::IngestBatchObject.name
             "Ingested"
-          when UpdateBatchObject.name
+          when Ddr::Batch::UpdateBatchObject.name
             "Updated"
         end
       end
 
       def update_batch(batch)
-        outcome = batch.success.eql?(batch.batch_objects.size) ? Batch::OUTCOME_SUCCESS : Batch::OUTCOME_FAILURE
+        outcome = batch.success_count.eql?(batch.batch_objects.size) ? Batch::OUTCOME_SUCCESS : Batch::OUTCOME_FAILURE
         logfile = File.new(Ddr::Batch::Log.file_path(batch.id))
         batch.update!(stop: DateTime.now,
                       status: Batch::STATUS_FINISHED,
@@ -70,9 +70,11 @@ module Ddr::Batch
 
       def send_notification(batch)
         begin
-          BatchProcessorRunMailer.send_notification(batch).deliver!
-        rescue
+          Ddr::Batch::BatchProcessorRunMailer.send_notification(batch).deliver!
+        rescue => e
           Rails.logger.error("An error occurred while attempting to send a notification for batch #{batch.id}")
+          Rails.logger.error(e.message)
+          Rails.logger.error(e.backtrace)
         end
       end
     end

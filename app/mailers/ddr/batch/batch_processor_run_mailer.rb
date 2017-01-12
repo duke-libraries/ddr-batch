@@ -9,6 +9,9 @@ module Ddr::Batch
       @title = "Batch Processor Run #{@batch.status} #{@batch.outcome}"
       @host = `uname -n`.strip
       @subject = "[#{@host}] #{@title}"
+      @size = @batch.batch_objects.size
+      @handled = @batch.handled_count
+      @success = @batch.success_count
       from = "#{`echo $USER`.strip}@#{@host}"
       attachments["details.txt"] = File.read(@batch.logfile.path)
       mail(from: from, to: @batch.user.email, subject: @subject)

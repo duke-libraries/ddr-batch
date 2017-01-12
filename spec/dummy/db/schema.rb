@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20161116142512) do
+ActiveRecord::Schema.define(version: 20161222192611) do
 
   create_table "batch_object_attributes", force: :cascade do |t|
     t.integer  "batch_object_id"
@@ -90,12 +90,10 @@ ActiveRecord::Schema.define(version: 20161116142512) do
     t.string   "status",                limit: 255
     t.datetime "start"
     t.datetime "stop"
-    t.string   "outcome",               limit: 255
-    t.integer  "failure",                           default: 0
-    t.integer  "success",                           default: 0
-    t.string   "version",               limit: 255
-    t.string   "logfile_file_name",     limit: 255
-    t.string   "logfile_content_type",  limit: 255
+    t.string   "outcome"
+    t.string   "version"
+    t.string   "logfile_file_name"
+    t.string   "logfile_content_type"
     t.integer  "logfile_file_size"
     t.datetime "logfile_updated_at"
     t.datetime "processing_step_start"

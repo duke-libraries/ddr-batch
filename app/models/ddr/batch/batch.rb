@@ -26,6 +26,10 @@ module Ddr::Batch
       batch_objects.where(handled: true).count
     end
 
+    def success_count
+      batch_objects.where(verified: true).count
+    end
+
     def time_to_complete
       unless start.nil?
         if handled_count > 0
