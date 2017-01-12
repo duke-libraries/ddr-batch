@@ -90,10 +90,10 @@ ActiveRecord::Schema.define(version: 20161222192611) do
     t.string   "status",                limit: 255
     t.datetime "start"
     t.datetime "stop"
-    t.string   "outcome"
-    t.string   "version"
-    t.string   "logfile_file_name"
-    t.string   "logfile_content_type"
+    t.string   "outcome",               limit: 255
+    t.string   "version",               limit: 255
+    t.string   "logfile_file_name",     limit: 255
+    t.string   "logfile_content_type",  limit: 255
     t.integer  "logfile_file_size"
     t.datetime "logfile_updated_at"
     t.datetime "processing_step_start"
