@@ -43,10 +43,11 @@ module Ddr::Batch
 
     def results_message
       if pid
-        verification_result = (verified ? "Verified" : "VERIFICATION FAILURE")
-        message = "Updated #{pid}...#{verification_result}"
+        message_level = verified ? Logger::INFO : Logger::WARN
+        verification_result = verified ? "Verified" : "VERIFICATION FAILURE"
+        ProcessingResultsMessage.new(message_level, "Updated #{pid}...#{verification_result}")
       else
-        message = "Attempt to update #{model} #{identifier} FAILED"
+        ProcessingResultsMessage.new(Logger::ERROR, "Attempt to update #{model} #{identifier} FAILED")
       end
     end
 
@@ -60,6 +61,7 @@ module Ddr::Batch
       repo_object = nil
       begin
         repo_object = ActiveFedora::Base.find(pid)
+        update!(model: repo_object.class.name) unless model.present?
         batch_object_attributes.each do |a|
           repo_object = case
           when a.operation.eql?(BatchObjectAttribute::OPERATION_ADD)
@@ -81,10 +83,6 @@ module Ddr::Batch
         end
       rescue Exception => e
         logger.error("Error in updating repository object #{pid} for #{identifier} : : #{e}")
-        if batch.present?
-          batch.status = Batch::STATUS_RESTARTABLE
-          batch.save
-        end
         raise e
       end
       repo_object

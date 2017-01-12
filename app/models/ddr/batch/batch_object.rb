@@ -7,6 +7,7 @@ module Ddr::Batch
       belongs_to :batch, inverse_of: :batch_objects
       has_many :batch_object_attributes, -> { order "id ASC" }, inverse_of: :batch_object, dependent: :destroy
       has_many :batch_object_datastreams, inverse_of: :batch_object, dependent: :destroy
+      has_many :batch_object_messages, inverse_of: :batch_object, dependent: :destroy
       has_many :batch_object_relationships, inverse_of: :batch_object, dependent: :destroy
       has_many :batch_object_roles, inverse_of: :batch_object, dependent: :destroy
 
@@ -19,6 +20,8 @@ module Ddr::Batch
   Batch object identifier: %{identifier}
   Model: %{model}
       EOS
+
+      ProcessingResultsMessage = Struct.new(:level, :message)
 
       def self.pid_from_identifier(identifier, batch_id)
         query = "identifier = :identifier"
@@ -112,12 +115,11 @@ module Ddr::Batch
               obj_model = batch.found_pids[r[:object]]
             else
               begin
-                obj = ActiveFedora::Base.find(r[:object], :cast => true)
-                obj_model = obj.class.name
+                obj_model = SolrDocument.find(r[:object]).active_fedora_model
                 if batch.present?
-                  batch.add_found_pid(obj.pid, obj_model)
+                  batch.add_found_pid(r[:object], obj_model)
                 end
-              rescue ActiveFedora::ObjectNotFoundError
+              rescue SolrDocument::NotFound
                 pid_in_batch = false
                 if batch.present?
                   if batch.pre_assigned_pids.include?(r[:object])

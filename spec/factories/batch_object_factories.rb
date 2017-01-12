@@ -120,10 +120,22 @@ FactoryGirl.define do
       with_add_desc_metadata_attributes
     end
 
+    factory :item_ingest_batch_object do
+      model "Item"
+    end
+
+    factory :component_ingest_batch_object do
+      model "Component"
+    end
+
     factory :target_ingest_batch_object do
       model "Target"
-      is_target_for_collection
-      with_add_content_datastream
+      # is_target_for_collection
+      # with_add_content_datastream
+    end
+
+    factory :attachment_ingest_batch_object do
+      model "Attachment"
     end
   end
 
