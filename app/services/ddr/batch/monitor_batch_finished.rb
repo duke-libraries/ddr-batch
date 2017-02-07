@@ -6,6 +6,9 @@ module Ddr::Batch
         event = ActiveSupport::Notifications::Event.new(*args)
         batch = Ddr::Batch::Batch.find(event.payload[:batch_id])
         batch_finished(batch)
+        if batch.outcome == Ddr::Batch::Batch::OUTCOME_SUCCESS
+          ActiveSupport::Notifications.instrument('success.batch.batch.ddr', batch_id: batch.id)
+        end
       end
 
       private
@@ -13,7 +16,7 @@ module Ddr::Batch
       def batch_finished(batch)
         log_batch_finish(batch)
         update_batch(batch)
-        send_notification(batch) if batch.user && batch.user.email
+        send_email(batch) if batch.user && batch.user.email
       end
 
       def log_batch_finish(batch)
@@ -68,7 +71,7 @@ module Ddr::Batch
                       logfile: logfile)
       end
 
-      def send_notification(batch)
+      def send_email(batch)
         begin
           Ddr::Batch::BatchProcessorRunMailer.send_notification(batch).deliver!
         rescue => e
