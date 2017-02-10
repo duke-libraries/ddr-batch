@@ -49,10 +49,11 @@ module Ddr::Batch
     end
 
     def enqueue_item_component_ingest(batch_object)
-      batch_object_ids = [ batch_object.id ]
-      parent_rel_query = "object = '#{batch_object.pid}' AND name = '#{Ddr::Batch::BatchObjectRelationship::RELATIONSHIP_PARENT}'"
-      parent_rel_recs = Ddr::Batch::BatchObjectRelationship.where(parent_rel_query)
-      parent_rel_recs.each { |parent_rel_rec| batch_object_ids << parent_rel_rec.batch_object_id}
+      query = [ "object = '#{batch_object.pid}'",
+                "batch_object_relationships.name = '#{Ddr::Batch::BatchObjectRelationship::RELATIONSHIP_PARENT}'",
+                "batches.id = #{batch_object.batch.id}" ].join(' AND ')
+      recs = Ddr::Batch::BatchObjectRelationship.joins(batch_object: :batch).where(query)
+      batch_object_ids = recs.map { |rec| rec.batch_object.id }.unshift(batch_object.id)
       Resque.enqueue(BatchObjectsProcessorJob, batch_object_ids, operator_id)
     end
   end
