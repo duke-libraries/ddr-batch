@@ -281,7 +281,7 @@ module Ddr::Batch
           file_name = File.basename(datastream[:payload])
           dsid = datastream[:name]
           opts = { filename: file_name }
-          opts.merge({ mime_type: mime_type }) if mime_type
+          opts.merge!(mime_type: mime_type) if mime_type
           repo_object.add_file(ds_content, dsid, opts)
         end
         return repo_object
