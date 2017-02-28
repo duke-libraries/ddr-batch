@@ -40,6 +40,16 @@ RSpec.configure do |config|
     mocks.verify_partial_doubles = true
   end
 
+  config.before(:suite) do
+    Ddr::Datastreams::ExternalFileDatastream.file_store = Dir.mktmpdir
+  end
+
+  config.after(:suite) do
+    if Ddr::Datastreams::ExternalFileDatastream.file_store
+      FileUtils.rm_rf Ddr::Datastreams::ExternalFileDatastream.file_store
+    end
+  end
+
 # The settings below are suggested to provide a good initial experience
 # with RSpec, but feel free to customize to your heart's content.
 =begin
