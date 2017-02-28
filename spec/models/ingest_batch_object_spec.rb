@@ -247,9 +247,8 @@ module Ddr::Batch
             it_behaves_like "a successful ingest"
           end
           context "payload type file" do
-            let(:object) { FactoryGirl.create(:generic_ingest_batch_object_with_file) }
-            let(:desc_metadata_provided) { true }
-            before { allow(File).to receive(:read).with('/tmp/qdc-rdf.nt').and_return('_:test <http://purl.org/dc/terms/title> "Test Object Title" .') }
+            let(:object) { FactoryGirl.create(:generic_ingest_batch_object) }
+            let(:desc_metadata_provided) { false }
             it_behaves_like "a successful ingest"
           end
           context "attributes" do
