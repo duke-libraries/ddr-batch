@@ -37,6 +37,18 @@ module Ddr::Batch
           verified = false if value.eql?(VERIFICATION_FAIL)
         end
         update_attributes(:verified => verified)
+        Ddr::Events::ValidationEvent.new.tap do |event|
+          event.object = repo_object
+          event.failure! unless verified
+          event.summary = EVENT_SUMMARY % {
+              label: "Object update validation",
+              batch_id: id,
+              identifier: identifier,
+              model: model
+          }
+          event.detail = verification_outcome_detail.join("\n")
+          event.save!
+        end
         repo_object
       end
     end
