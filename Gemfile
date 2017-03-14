@@ -5,4 +5,4 @@ gemspec
 
 gem "devise"
 gem "rails", "4.2.7"
-gem "ddr-models", git: 'https://github.com/duke-libraries/ddr-models', ref: '77451e1c456cbd97082ab7b6eb6584f4dab49db9'
+gem "ddr-models", git: 'https://github.com/duke-libraries/ddr-models', ref: 'ab24d51fae23ee7ae3f665b56b10a514aa4d120a'
