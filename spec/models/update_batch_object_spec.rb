@@ -96,6 +96,31 @@ module Ddr::Batch
           end
         end
       end
+      context "verifications" do
+        let(:batch) { FactoryGirl.create(:batch_with_basic_update_batch_object) }
+        before do
+          object.process(batch.user)
+          repo_object.reload
+        end
+        context "no verification failure" do
+          let(:repo_object) { TestModelOmnibus.create(pid: object.pid, title: [ "Test Model Title" ], identifier: [ "id1", "id2" ]) }
+          it "logs an appropriate validation event" do
+            validation_events = repo_object.events.where(type: Ddr::Events::ValidationEvent)
+            expect(validation_events).to_not be_empty
+            expect(validation_events.first.outcome).to eq(Ddr::Events::Event::SUCCESS)
+            expect(validation_events.first.detail).to include('PASS')
+            expect(validation_events.first.detail).to_not include('FAIL')
+          end
+        end
+        context "verification failure" do
+          it "logs an appropriate validation event" do
+            validation_events = repo_object.events.where(type: Ddr::Events::ValidationEvent)
+            expect(validation_events).to_not be_empty
+            expect(validation_events.first.outcome).to eq(Ddr::Events::Event::FAILURE)
+            expect(validation_events.first.detail).to include('FAIL')
+          end
+        end
+      end
     end
   end
 end
