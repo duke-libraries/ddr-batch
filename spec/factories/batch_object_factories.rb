@@ -141,7 +141,6 @@ FactoryGirl.define do
 
   factory :update_batch_object, :class => Ddr::Batch::UpdateBatchObject do
     has_identifier
-    has_label
     has_pid
 
     factory :basic_update_batch_object do

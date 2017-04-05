@@ -37,6 +37,18 @@ module Ddr::Batch
           verified = false if value.eql?(VERIFICATION_FAIL)
         end
         update_attributes(:verified => verified)
+        Ddr::Events::ValidationEvent.new.tap do |event|
+          event.object = repo_object
+          event.failure! unless verified
+          event.summary = EVENT_SUMMARY % {
+              label: "Object update validation",
+              batch_id: id,
+              identifier: identifier,
+              model: model
+          }
+          event.detail = verification_outcome_detail.join("\n")
+          event.save!
+        end
         repo_object
       end
     end
@@ -78,9 +90,7 @@ module Ddr::Batch
             populate_datastream(repo_object, d)
           end
         end
-        if repo_object.save
-          repo_object.notify_event(:update, user: user, comment: event_log_comment)
-        end
+        repo_object.save!(user: user, comment: event_log_comment)
       rescue Exception => e
         logger.error("Error in updating repository object #{pid} for #{identifier} : : #{e}")
         raise e

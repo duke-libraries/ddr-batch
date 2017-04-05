@@ -11,6 +11,7 @@ require "capybara/rspec"
 require "ddr/auth/test_helpers"
 require "factory_girl_rails"
 require "database_cleaner"
+require "resque"
 
 Resque.inline = true
 
