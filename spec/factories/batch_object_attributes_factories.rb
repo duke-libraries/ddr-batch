@@ -7,7 +7,7 @@ FactoryGirl.define do
       factory :batch_object_add_desc_metadata_attribute do
         datastream Ddr::Datastreams::DESC_METADATA
         name 'title'
-        value 'Test Object Title'
+        value ' Test Object Title '
         value_type Ddr::Batch::BatchObjectAttribute::VALUE_TYPE_STRING
       end
 
