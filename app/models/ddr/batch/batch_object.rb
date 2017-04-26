@@ -203,7 +203,7 @@ module Ddr::Batch
       end
 
       def verify_attribute(repo_object, attribute)
-        repo_object.datastreams[attribute.datastream].values(attribute.name).include?(attribute.value) ?
+        repo_object.datastreams[attribute.datastream].values(attribute.name).include?(attribute.value.strip) ?
                 VERIFICATION_PASS : VERIFICATION_FAIL
       end
 
