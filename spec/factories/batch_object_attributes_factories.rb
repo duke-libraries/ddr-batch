@@ -11,6 +11,13 @@ FactoryGirl.define do
         value_type Ddr::Batch::BatchObjectAttribute::VALUE_TYPE_STRING
       end
 
+      factory :batch_object_add_admin_set_attribute do
+        datastream Ddr::Datastreams::ADMIN_METADATA
+        name 'admin_set'
+        value 'foo'
+        value_type Ddr::Batch::BatchObjectAttribute::VALUE_TYPE_STRING
+      end
+
     end
 
     factory :batch_object_clear_attribute do
