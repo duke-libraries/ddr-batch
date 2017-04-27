@@ -53,6 +53,9 @@ module Ddr::Batch
       describe "previous batch with conflicting repository ID's" do
         let!(:prev_batch) { FactoryGirl.create(:collection_creating_ingest_batch) }
         let(:batch) { FactoryGirl.create(:collection_creating_ingest_batch) }
+        before do
+          allow(Ddr::Models::AdminSet).to receive(:find_by_code) { double('Ddr::Models::AdminSet', code: 'foo', title: 'Foo Admin Set') }
+        end
         it "should include the correct batch objects in the processing jobs" do
           expect(Resque).to receive(:enqueue).with(BatchObjectsProcessorJob, [ batch.batch_objects[1].id, batch.batch_objects[2].id ], batch.user.id)
           expect(Resque).to receive(:enqueue).with(BatchObjectsProcessorJob, [ batch.batch_objects[3].id, batch.batch_objects[4].id, batch.batch_objects[5].id ], batch.user.id)
