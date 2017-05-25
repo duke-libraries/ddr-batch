@@ -1,5 +1,5 @@
 module Ddr
   module Batch
-    VERSION = "1.4.0.pre"
+    VERSION = "1.4.0.rc1"
   end
 end
