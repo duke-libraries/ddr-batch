@@ -41,6 +41,7 @@ module Ddr::Batch
   describe IngestBatchObject, type: :model, batch: true, ingest: true do
 
     before do
+      allow(Ddr::Models::AdminSet).to receive(:find_by_code) { double('Ddr::Models::AdminSet', code: 'foo', title: 'Foo Admin Set') }
       allow(File).to receive(:readable?).and_call_original
       allow(File).to receive(:readable?).with("/tmp/qdc-rdf.nt").and_return(true)
     end
@@ -102,6 +103,12 @@ module Ddr::Batch
         context "collection missing title" do
           let(:object) { FactoryGirl.create(:ingest_batch_object) }
           let(:error_message) { "#{error_prefix} Collection title can't be blank" }
+          before { object.model = "Collection" }
+          it_behaves_like "an invalid ingest object"
+        end
+        context "collection missing admin set" do
+          let(:object) { FactoryGirl.create(:ingest_batch_object) }
+          let(:error_message) { "#{error_prefix} Collection admin_set can't be blank" }
           before { object.model = "Collection" }
           it_behaves_like "an invalid ingest object"
         end
