@@ -47,7 +47,7 @@ module Ddr::Batch
     end
 
     def ingest(user, opts = {})
-      repo_object = create_repository_object
+      repo_object = create_repository_object(user)
       if !repo_object.nil? && !repo_object.new_record?
         ingest_outcome_detail = []
         ingest_outcome_detail << "Ingested #{model} #{identifier} into #{repo_object.pid}"
@@ -90,14 +90,14 @@ module Ddr::Batch
       repo_object
     end
 
-    def create_repository_object
+    def create_repository_object(user)
       repo_pid = pid if pid.present?
       repo_object = nil
       begin
         repo_object = model.constantize.new(:pid => repo_pid)
         repo_object.label = label if label
         batch_object_attributes.each { |a| repo_object = add_attribute(repo_object, a) }
-        repo_object.save(validate: false, skip_structure_updates: true)
+        repo_object.save(validate: false, skip_structure_updates: true, user: user)
         batch_object_datastreams.each { |d| repo_object = populate_datastream(repo_object, d) }
         batch_object_relationships.each { |r| repo_object = add_relationship(repo_object, r) }
         batch_object_roles.each { |r| repo_object = add_role(repo_object, r) }

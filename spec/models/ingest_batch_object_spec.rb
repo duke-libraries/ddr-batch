@@ -21,6 +21,7 @@ module Ddr::Batch
     it "should result in a verified repository object" do
       expect(object.verified).to be_truthy
       expect(object.pid).to eq(assigned_pid) if assigned_pid.present?
+      expect(repo_object.ingested_by).to eq(user.user_key)
       if desc_metadata_provided
         expect(repo_object.title).to eq(["Test Object Title"])
       end
@@ -290,7 +291,10 @@ module Ddr::Batch
             repo_object = object.model.constantize.new(:pid => assigned_pid, title: ["Test Object Title"])
             repo_object.save(validate: false)
           end
-          it_behaves_like "a successful ingest"
+          it "does not (re-)ingest the object" do
+            expect(object).not_to receive(:ingest)
+            object.process(user)
+          end
         end
       end
 
