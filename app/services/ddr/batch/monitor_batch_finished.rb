@@ -40,7 +40,8 @@ module Ddr::Batch
       end
 
       def track_result(results_tracker, batch_object)
-        type, model = [ batch_object.type, batch_object.model ]
+        type = batch_object.type
+        model = batch_object.model || "Missing Model"
         results_tracker[type] = Hash.new unless results_tracker.has_key?(type)
         results_tracker[type][model] = Hash.new unless results_tracker[type].has_key?(model)
         results_tracker[type][model][:successes] = 0 unless results_tracker[type][model].has_key?(:successes)
