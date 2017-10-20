@@ -38,6 +38,23 @@ module Ddr::Batch
       end
     end
 
+    describe "#deletable?" do
+      it "should determine if the batch is deletable" do
+        expect(Ddr::Batch::Batch.new).to be_deletable
+        expect(Ddr::Batch::Batch.new(status: Ddr::Batch::Batch::STATUS_DELETING)).to_not be_deletable
+        expect(Ddr::Batch::Batch.new(status: Ddr::Batch::Batch::STATUS_FINISHED)).to_not be_deletable
+        expect(Ddr::Batch::Batch.new(status: Ddr::Batch::Batch::STATUS_INTERRUPTED)).to_not be_deletable
+        expect(Ddr::Batch::Batch.new(status: Ddr::Batch::Batch::STATUS_INVALID)).to be_deletable
+        expect(Ddr::Batch::Batch.new(status: Ddr::Batch::Batch::STATUS_PROCESSING)).to_not be_deletable
+        expect(Ddr::Batch::Batch.new(status: Ddr::Batch::Batch::STATUS_QUEUED)).to_not be_deletable
+        expect(Ddr::Batch::Batch.new(status: Ddr::Batch::Batch::STATUS_QUEUED_FOR_DELETION)).to_not be_deletable
+        expect(Ddr::Batch::Batch.new(status: Ddr::Batch::Batch::STATUS_READY)).to be_deletable
+        expect(Ddr::Batch::Batch.new(status: Ddr::Batch::Batch::STATUS_RESTARTABLE)).to_not be_deletable
+        expect(Ddr::Batch::Batch.new(status: Ddr::Batch::Batch::STATUS_RUNNING)).to_not be_deletable
+        expect(Ddr::Batch::Batch.new(status: Ddr::Batch::Batch::STATUS_VALIDATED)).to be_deletable
+        expect(Ddr::Batch::Batch.new(status: Ddr::Batch::Batch::STATUS_VALIDATING)).to_not be_deletable
+      end
+    end
   end
 
 end

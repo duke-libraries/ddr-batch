@@ -63,6 +63,12 @@ module Ddr::Batch
       status == STATUS_FINISHED
     end
 
+    def deletable?
+      [ nil,
+        Ddr::Batch::Batch::STATUS_READY,
+        Ddr::Batch::Batch::STATUS_VALIDATED,
+        Ddr::Batch::Batch::STATUS_INVALID ].include?(status)
+    end
   end
 
 end
