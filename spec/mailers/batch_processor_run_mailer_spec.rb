@@ -27,14 +27,14 @@ module Ddr::Batch
     end
 
     it "should send a notification" do
-      Ddr::Batch::BatchProcessorRunMailer.send_notification(batch).deliver!
+      Ddr::Batch::BatchProcessorRunMailer.send_notification(batch).deliver_now!
       expect(ActionMailer::Base.deliveries).not_to be_empty
       email = ActionMailer::Base.deliveries.first
       expect(email.to).to eq([user.email])
       expect(email.subject).to include("Batch Processor Run #{batch.status} #{batch.outcome}")
-      expect(email.parts.first.to_s).to include("Ingested TestModel")
-      expect(email.parts.second.to_s).to include("Objects in batch: #{batch.batch_objects.count}")
-      expect(email.parts.second.to_s).to include(Batch::OUTCOME_SUCCESS)
+      expect(email.to_s).to include("Objects in batch: #{batch.batch_objects.count}")
+      expect(email.to_s).to include(Batch::OUTCOME_SUCCESS)
+      expect(email.attachments.first.to_s).to include("Ingested TestModel")
     end
   end
 
