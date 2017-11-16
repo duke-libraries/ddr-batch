@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20161222192611) do
+ActiveRecord::Schema.define(version: 20171116183514) do
 
   create_table "batch_object_attributes", force: :cascade do |t|
     t.integer  "batch_object_id"
@@ -97,6 +97,8 @@ ActiveRecord::Schema.define(version: 20161222192611) do
     t.integer  "logfile_file_size"
     t.datetime "logfile_updated_at"
     t.datetime "processing_step_start"
+    t.string   "collection_id"
+    t.string   "collection_title"
   end
 
   create_table "bookmarks", force: :cascade do |t|

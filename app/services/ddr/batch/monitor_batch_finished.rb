@@ -85,6 +85,3 @@ module Ddr::Batch
 
   end
 end
-
-
-
