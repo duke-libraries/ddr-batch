@@ -27,5 +27,16 @@ module Ddr::Batch
       end
     end
 
+    describe "some objects processed" do
+      before do
+        batch.batch_objects.first.update_attributes(verified: true)
+        allow(ProcessBatchObject).to receive(:new).with(batch_object_id: batch.batch_objects[1].id, operator: batch.user).and_call_original
+        allow_any_instance_of(ProcessBatchObject).to receive(:execute) { true }
+      end
+      it "should not process the already processed objects" do
+        expect(ProcessBatchObject).to_not receive(:new).with(batch_object_id: batch.batch_objects[0].id, operator: batch.user)
+        pbos.execute
+      end
+    end
   end
 end
