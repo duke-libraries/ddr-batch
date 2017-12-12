@@ -25,6 +25,7 @@ module Ddr::Batch
 
       def log_batch_start(batch)
         logger = Ddr::Batch::Log.logger(batch.id)
+        logger.info "Collection: #{batch.collection_title}" if batch.collection_title.present?
         logger.info "Batch id: #{batch.id}"
         logger.info "Batch name: #{batch.name}" if name
         logger.info "Batch size: #{batch.batch_objects.size}"
