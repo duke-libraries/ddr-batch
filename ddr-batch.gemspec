@@ -18,7 +18,7 @@ Gem::Specification.new do |s|
 
   s.add_dependency "rails", "~> 4.1"
   s.add_dependency "devise", "~> 3.4"
-  s.add_dependency "paperclip", "~> 4.2.0"
+  s.add_dependency "paperclip", "~> 5.2"
   s.add_dependency "ddr-models", "~> 2.10"
   s.add_dependency "log4r"
 
