@@ -19,7 +19,7 @@ Gem::Specification.new do |s|
   s.add_dependency "rails", "~> 4.1"
   s.add_dependency "devise", "~> 3.4"
   s.add_dependency "paperclip", "~> 5.2"
-  s.add_dependency "ddr-models", "~> 2.10"
+  s.add_dependency "ddr-models", "~> 2.11"
 
   s.add_development_dependency "sqlite3"
   s.add_development_dependency "rspec-rails", "~> 3.1"
