@@ -24,7 +24,7 @@ module Ddr::Batch
         verification_result = verified ? "Verified" : "VERIFICATION FAILURE"
         ProcessingResultsMessage.new(message_level, "Ingested #{model} #{identifier} into #{pid}...#{verification_result}")
       else
-        ProcessingResultsMessagemessage.new(Logger::ERROR, "Attempt to ingest #{model} #{identifier} FAILED")
+        ProcessingResultsMessage.new(Logger::ERROR, "Attempt to ingest #{model} #{identifier} FAILED")
       end
     end
 
