@@ -3,6 +3,7 @@ en:
         batch:
             errors:
                 prefix: "%{identifier}:"
+                batch_object_processing: "Error processing batch object: %{error_msg}"
             no_batches: "No %{type} batches found for your user account."
             web:
                 action_names:
